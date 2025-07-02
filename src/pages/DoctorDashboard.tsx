@@ -1,10 +1,10 @@
-import { useState } from 'react';
-import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Textarea } from '@/components/ui/textarea';
+import { useState } from "react";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
 import {
   User,
   Calendar,
@@ -16,109 +16,102 @@ import {
   Upload,
   Edit,
   Trash,
-  Package
-} from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import ScheduleForm from '@/components/ScheduleForm';
-import ExaminationForm from '@/components/ExaminationForm';
-import PatientDetail from '@/components/PatientDetail';
-import WeeklyScheduleGrid from '@/components/WeeklyScheduleGrid';
-import TodayVisitResult from '@/components/TodayResult';
-import AppointmentForm from '@/components/AppointmentForm';
-
+  Package,
+} from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import ScheduleForm from "@/components/ScheduleForm";
+import ExaminationForm from "@/components/ExaminationForm";
+import PatientDetail from "@/components/PatientDetail";
+import WeeklyScheduleGrid from "@/components/WeeklyScheduleGrid";
+import TodayVisitResult from "@/components/TodayResult";
+import AppointmentForm from "@/components/AppointmentForm";
 
 // Mock data with updated structure
 const mockSchedule = [
   {
     id: 1,
-    date: '2024-01-15',
-    dayOfWeek: 'monday',
-    status: 'có mặt',
-    room: 'Phòng 1',
-    timeSlots: [
-      { time: '08:00-12:00', room: 'Phòng 1' }
-    ]
+    date: "2024-01-15",
+    dayOfWeek: "monday",
+    status: "có mặt",
+    room: "Phòng 1",
+    timeSlots: [{ time: "08:00-12:00", room: "Phòng 1" }],
   },
   {
     id: 2,
-    date: '2024-01-16',
-    dayOfWeek: 'tuesday',
-    status: 'nghỉ',
-    room: 'Phòng 2',
-    timeSlots: [
-      { time: '14:00-17:00', room: 'Phòng 2' }
-    ]
-  }
+    date: "2024-01-16",
+    dayOfWeek: "tuesday",
+    status: "nghỉ",
+    room: "Phòng 2",
+    timeSlots: [{ time: "14:00-17:00", room: "Phòng 2" }],
+  },
 ];
 
 const mockQueue = [
   {
     id: 1,
-    patientName: 'Nguyễn Văn A',
+    patientName: "Nguyễn Văn A",
     queueNumber: 1,
-    symptoms: 'Đau đầu, chóng mặt',
-    status: 'waiting',
-    time: '08:00'
+    symptoms: "Đau đầu, chóng mặt",
+    status: "waiting",
+    time: "08:00",
   },
   {
     id: 2,
-    patientName: 'Trần Thị B',
+    patientName: "Trần Thị B",
     queueNumber: 2,
-    symptoms: 'Mất ngủ',
-    status: 'called',
-    time: '08:30'
-  }
+    symptoms: "Mất ngủ",
+    status: "called",
+    time: "08:30",
+  },
 ];
 const mockAppointments = [
   {
     id: 1,
-    patientName: 'Nguyễn Văn A',
-    email: 'nguyenvana@gmail.com',
-    phone: '0901234567',
-    time: '08:00',
-    date: '2024-01-15',
-    symptoms: 'Đau đầu, chóng mặt',
-    status: 'pending'
+    patientName: "Nguyễn Văn A",
+    email: "nguyenvana@gmail.com",
+    phone: "0901234567",
+    time: "08:00",
+    date: "2024-01-15",
+    symptoms: "Đau đầu, chóng mặt",
+    status: "pending",
   },
   {
     id: 2,
-    patientName: 'Trần Thị B',
-    email: 'tranthib@gmail.com',
-    phone: '0912345678',
-    time: '09:00',
-    date: '2024-01-15',
-    symptoms: 'Mất ngủ',
-    status: 'checked-in'
+    patientName: "Trần Thị B",
+    email: "tranthib@gmail.com",
+    phone: "0912345678",
+    time: "09:00",
+    date: "2024-01-15",
+    symptoms: "Mất ngủ",
+    status: "checked-in",
   },
   {
     id: 3,
-    patientName: 'Phạm Văn C',
-    email: 'phamvanc@gmail.com',
-    phone: '0988888888',
-    time: '10:00',
-    date: '2024-01-15',
-    symptoms: 'Tê tay, đau vai gáy',
-    status: 'payment-required',
+    patientName: "Phạm Văn C",
+    email: "phamvanc@gmail.com",
+    phone: "0988888888",
+    time: "10:00",
+    date: "2024-01-15",
+    symptoms: "Tê tay, đau vai gáy",
+    status: "payment-required",
     services: [
-      { name: 'Chụp CT', price: 500000 },
-      { name: 'Điện não đồ', price: 400000 },
-    ]
-  }
+      { name: "Chụp CT", price: 500000 },
+      { name: "Điện não đồ", price: 400000 },
+    ],
+  },
 ];
 
 const mockRoomMaterials = {
-  'Phòng 1': [
-    { id: 1, name: 'Găng tay y tế', quantity: 200, unit: 'hộp' },
-    { id: 2, name: 'Khẩu trang', quantity: 500, unit: 'cái' },
+  "Phòng 1": [
+    { id: 1, name: "Găng tay y tế", quantity: 200, unit: "hộp" },
+    { id: 2, name: "Khẩu trang", quantity: 500, unit: "cái" },
   ],
-  'Phòng 2': [
-    { id: 3, name: 'Ống tiêm', quantity: 100, unit: 'ống' },
-  ],
+  "Phòng 2": [{ id: 3, name: "Ống tiêm", quantity: 100, unit: "ống" }],
 };
 
 const DoctorDashboard = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('profile');
+  const [activeTab, setActiveTab] = useState("profile");
   const [schedule, setSchedule] = useState(mockSchedule);
   const [queue, setQueue] = useState(mockQueue);
   const [selectedPatient, setSelectedPatient] = useState(null);
@@ -130,44 +123,45 @@ const DoctorDashboard = () => {
   const [showAppointmentForm, setShowAppointmentForm] = useState(false);
   const [appointments, setAppointments] = useState(mockAppointments);
 
-
   const [showMaterialModal, setShowMaterialModal] = useState(false);
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [selectedMaterial, setSelectedMaterial] = useState(null);
-  const [usedQuantity, setUsedQuantity] = useState('');
+  const [usedQuantity, setUsedQuantity] = useState("");
   const [roomMaterials, setRoomMaterials] = useState(mockRoomMaterials);
 
   const handleUseMaterial = () => {
     if (!selectedRoom || !selectedMaterial) return;
 
     const quantity = parseInt(usedQuantity);
-    if (isNaN(quantity) || quantity <= 0) return alert('Số lượng không hợp lệ');
+    if (isNaN(quantity) || quantity <= 0) return alert("Số lượng không hợp lệ");
 
-    setRoomMaterials(prev => ({
+    setRoomMaterials((prev) => ({
       ...prev,
-      [selectedRoom]: prev[selectedRoom].map(m =>
+      [selectedRoom]: prev[selectedRoom].map((m) =>
         m.id === selectedMaterial.id
           ? { ...m, quantity: Math.max(0, m.quantity - quantity) }
           : m
-      )
+      ),
     }));
 
     // Reset
     setShowMaterialModal(false);
-    setUsedQuantity('');
+    setUsedQuantity("");
     setSelectedMaterial(null);
   };
   const updateQueueStatus = (id, status) => {
-    setQueue(queue.map(q =>
-      q.id === id ? { ...q, status } : q
-    ));
+    setQueue(queue.map((q) => (q.id === id ? { ...q, status } : q)));
   };
 
   const handleScheduleSave = (scheduleData) => {
     if (editingSchedule) {
-      setSchedule(schedule.map(s =>
-        s.id === editingSchedule.id ? { ...editingSchedule, ...scheduleData } : s
-      ));
+      setSchedule(
+        schedule.map((s) =>
+          s.id === editingSchedule.id
+            ? { ...editingSchedule, ...scheduleData }
+            : s
+        )
+      );
     } else {
       setSchedule([...schedule, { id: Date.now(), ...scheduleData }]);
     }
@@ -176,7 +170,7 @@ const DoctorDashboard = () => {
   };
 
   const handleDeleteSchedule = (id) => {
-    setSchedule(schedule.filter(s => s.id !== id));
+    setSchedule(schedule.filter((s) => s.id !== id));
   };
 
   const handleCreateAppointment = (patient = null) => {
@@ -185,7 +179,7 @@ const DoctorDashboard = () => {
   };
 
   const handleExaminationSave = (examinationData) => {
-    console.log('Examination data saved:', examinationData);
+    console.log("Examination data saved:", examinationData);
     setShowExaminationForm(false);
     setSelectedPatient(null);
   };
@@ -201,42 +195,56 @@ const DoctorDashboard = () => {
   };
 
   const handleLogout = () => {
-    navigate('/');
+    navigate("/");
   };
 
   const getQueueStatusColor = (status) => {
     switch (status) {
-      case 'waiting': return 'bg-yellow-100 text-yellow-800';
-      case 'called': return 'bg-blue-100 text-blue-800';
-      case 'doing': return 'bg-purple-100 text-purple-800';
-      case 'completed': return 'bg-green-100 text-green-800';
-      case 'canceled': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case "waiting":
+        return "bg-yellow-100 text-yellow-800";
+      case "called":
+        return "bg-blue-100 text-blue-800";
+      case "doing":
+        return "bg-purple-100 text-purple-800";
+      case "completed":
+        return "bg-green-100 text-green-800";
+      case "canceled":
+        return "bg-red-100 text-red-800";
+      default:
+        return "bg-gray-100 text-gray-800";
     }
   };
 
   const getQueueStatusText = (status) => {
     switch (status) {
-      case 'waiting': return 'Đang chờ';
-      case 'called': return 'Đã gọi';
-      case 'doing': return 'Đang làm chỉ định';
-      case 'completed': return 'Hoàn thành';
-      case 'canceled': return 'Đã hủy';
-      default: return status;
+      case "waiting":
+        return "Đang chờ";
+      case "called":
+        return "Đã gọi";
+      case "doing":
+        return "Đang làm chỉ định";
+      case "completed":
+        return "Hoàn thành";
+      case "canceled":
+        return "Đã hủy";
+      default:
+        return status;
     }
   };
 
   const handleCompleteExamination = (patientId) => {
-    setQueue(prevQueue =>
-      prevQueue.map(p =>
-        p.id === patientId ? { ...p, status: 'completed' } : p
+    setQueue((prevQueue) =>
+      prevQueue.map((p) =>
+        p.id === patientId ? { ...p, status: "completed" } : p
       )
     );
   };
 
   const handleAppointmentSave = (appointmentData) => {
-
-    setAppointments([...appointments, { id: Date.now(), ...appointmentData, status: 'pending' }]);
+    setAppointments([
+      ...appointments,
+      { id: Date.now(), ...appointmentData, status: "pending" },
+    ]);
     setShowAppointmentForm(false);
     setSelectedPatient(null);
   };
@@ -270,8 +278,8 @@ const DoctorDashboard = () => {
               setSelectedPatient(null);
             }}
             onStatusChange={(newStatus) => {
-              setQueue(prevQueue =>
-                prevQueue.map(p =>
+              setQueue((prevQueue) =>
+                prevQueue.map((p) =>
                   p.id === selectedPatient.id ? { ...p, status: newStatus } : p
                 )
               );
@@ -293,7 +301,7 @@ const DoctorDashboard = () => {
               setSelectedPatient(null);
             }}
             onEdit={() => {
-              console.log('Edit patient');
+              console.log("Edit patient");
             }}
             onCreateMedicalRecord
           />
@@ -323,7 +331,7 @@ const DoctorDashboard = () => {
       <div className="min-h-screen bg-gray-50 p-6">
         <div className="container mx-auto">
           <AppointmentForm
-            appointment={() => { }}
+            appointment={() => {}}
             patient={selectedPatient}
             onSave={handleAppointmentSave}
             onCancel={() => {
@@ -343,25 +351,36 @@ const DoctorDashboard = () => {
         <div className="container mx-auto px-4 py-4">
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-2xl font-bold text-gray-800">Dashboard - Bác Sĩ</h1>
+              <h1 className="text-2xl font-bold text-gray-800">
+                Dashboard - Bác Sĩ
+              </h1>
               <p className="text-gray-600">Quản lý lịch làm và khám bệnh</p>
             </div>
             <div className="flex items-center gap-4">
               <Badge className="bg-green-100 text-green-800">Trực tuyến</Badge>
-              <Button variant="outline" onClick={handleLogout}>Đăng Xuất</Button>
+              <Button variant="outline" onClick={handleLogout}>
+                Đăng Xuất
+              </Button>
             </div>
           </div>
         </div>
       </header>
 
       <div className="container mx-auto px-4 py-6">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
+        <Tabs
+          value={activeTab}
+          onValueChange={setActiveTab}
+          className="space-y-6"
+        >
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="profile" className="flex items-center gap-2">
               <User className="w-4 h-4" />
               Thông Tin Của Tôi
             </TabsTrigger>
-            <TabsTrigger value="doctor-profile" className="flex items-center gap-2">
+            <TabsTrigger
+              value="doctor-profile"
+              className="flex items-center gap-2"
+            >
               <Stethoscope className="w-4 h-4" />
               Hồ Sơ Bác Sĩ
             </TabsTrigger>
@@ -369,15 +388,24 @@ const DoctorDashboard = () => {
               <Calendar className="w-4 h-4" />
               Lịch Làm
             </TabsTrigger>
-            <TabsTrigger value="examinations" className="flex items-center gap-2">
+            <TabsTrigger
+              value="examinations"
+              className="flex items-center gap-2"
+            >
               <FileText className="w-4 h-4" />
               Lịch Khám
             </TabsTrigger>
-            <TabsTrigger value="room-materials" className="flex items-center gap-2">
+            <TabsTrigger
+              value="room-materials"
+              className="flex items-center gap-2"
+            >
               <Package className="w-4 h-4" />
               Vật Tư Trong Phòng
             </TabsTrigger>
-
+            <TabsTrigger value="call-board" className="flex items-center gap-2">
+              <Clock className="w-4 h-4" />
+              Màn Hình Gọi
+            </TabsTrigger>
           </TabsList>
 
           {/* Profile Tab */}
@@ -386,27 +414,39 @@ const DoctorDashboard = () => {
               <h2 className="text-xl font-semibold mb-4">Thông Tin Cá Nhân</h2>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Tên</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Tên
+                  </label>
                   <Input defaultValue="BS. Nguyễn Văn An" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Ngày sinh</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Ngày sinh
+                  </label>
                   <Input type="date" defaultValue="1980-05-15" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Giới tính</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Giới tính
+                  </label>
                   <Input defaultValue="Nam" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Email
+                  </label>
                   <Input defaultValue="bacsi@khanhanclinic.com" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Số điện thoại</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Số điện thoại
+                  </label>
                   <Input defaultValue="0987654321" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Địa chỉ</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Địa chỉ
+                  </label>
                   <Input defaultValue="Hà Nội, Việt Nam" />
                 </div>
               </div>
@@ -422,7 +462,9 @@ const DoctorDashboard = () => {
               <h2 className="text-xl font-semibold mb-4">Hồ Sơ Bác Sĩ</h2>
               <div className="grid grid-cols-2 gap-4">
                 <div className="col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Avatar</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Avatar
+                  </label>
                   <div className="flex items-center gap-4">
                     <div className="w-16 h-16 bg-gray-200 rounded-full"></div>
                     <Button variant="outline">
@@ -432,16 +474,24 @@ const DoctorDashboard = () => {
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Trình độ chuyên môn</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Trình độ chuyên môn
+                  </label>
                   <Input defaultValue="Thạc sĩ Y khoa" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Số năm kinh nghiệm</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Số năm kinh nghiệm
+                  </label>
                   <Input defaultValue="15 năm" />
                 </div>
                 <div className="col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Bằng cấp</label>
-                  <Textarea defaultValue="- Bằng Tiến sĩ Y khoa - Đại học Y Hà Nội&#10;- Chứng chỉ chuyên khoa Thần kinh - Bệnh viện Bạch Mai&#10;- Chứng chỉ điều trị đau đầu - Hiệp hội Thần kinh Việt Nam" />
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Bằng cấp
+                  </label>
+                  <Textarea
+                    defaultValue="- Bằng Tiến sĩ Y khoa - Đại học Y Hà Nội&#10;- Chứng chỉ chuyên khoa Thần kinh - Bệnh viện Bạch Mai&#10;- Chứng chỉ điều trị đau đầu - Hiệp hội Thần kinh Việt Nam"
+                  />
                 </div>
               </div>
               <div className="flex gap-2 mt-4">
@@ -475,8 +525,12 @@ const DoctorDashboard = () => {
                   <div className="flex justify-between items-start">
                     <div className="space-y-2">
                       <div className="flex items-center gap-3">
-                        <span className="text-2xl font-bold text-blue-600">#{patient.queueNumber}</span>
-                        <h3 className="text-lg font-semibold">{patient.patientName}</h3>
+                        <span className="text-2xl font-bold text-blue-600">
+                          #{patient.queueNumber}
+                        </span>
+                        <h3 className="text-lg font-semibold">
+                          {patient.patientName}
+                        </h3>
                         <Badge className={getQueueStatusColor(patient.status)}>
                           {getQueueStatusText(patient.status)}
                         </Badge>
@@ -492,16 +546,18 @@ const DoctorDashboard = () => {
                     </div>
 
                     <div className="flex gap-2">
-                      {['waiting', 'doing'].includes(patient.status) && (
+                      {["waiting", "doing"].includes(patient.status) && (
                         <Button
                           size="sm"
-                          onClick={() => updateQueueStatus(patient.id, 'called')}
+                          onClick={() =>
+                            updateQueueStatus(patient.id, "called")
+                          }
                         >
                           Gọi Bệnh Nhân
                         </Button>
                       )}
 
-                      {['called', 'doing'].includes(patient.status) && (
+                      {["called", "doing"].includes(patient.status) && (
                         <div className="space-x-2">
                           <Button
                             size="sm"
@@ -529,10 +585,9 @@ const DoctorDashboard = () => {
                           >
                             Tạo Phiếu Khám
                           </Button>
-
                         </div>
                       )}
-                      {patient.status === 'completed' && (
+                      {patient.status === "completed" && (
                         <Button
                           size="sm"
                           variant="outline"
@@ -551,16 +606,23 @@ const DoctorDashboard = () => {
 
           <TabsContent value="room-materials" className="space-y-6">
             <Card className="p-6">
-              <h2 className="text-xl font-semibold mb-4">Vật tư tại phòng làm việc</h2>
+              <h2 className="text-xl font-semibold mb-4">
+                Vật tư tại phòng làm việc
+              </h2>
               {schedule
-                .filter(s => s.status === 'có mặt')
+                .filter((s) => s.status === "có mặt")
                 .map((s, index) => (
                   <div key={index} className="mb-6">
                     <h3 className="text-lg font-bold mb-2">{s.room}</h3>
                     <ul className="list-disc list-inside space-y-1 ml-4">
                       {(roomMaterials[s.room] || []).map((material) => (
-                        <li key={material.id} className="flex justify-between items-center">
-                          <span>{material.name}: {material.quantity} {material.unit}</span>
+                        <li
+                          key={material.id}
+                          className="flex justify-between items-center"
+                        >
+                          <span>
+                            {material.name}: {material.quantity} {material.unit}
+                          </span>
                           <Button
                             size="sm"
                             variant="outline"
@@ -575,7 +637,8 @@ const DoctorDashboard = () => {
                         </li>
                       ))}
 
-                      {(!mockRoomMaterials[s.room] || mockRoomMaterials[s.room].length === 0) && (
+                      {(!mockRoomMaterials[s.room] ||
+                        mockRoomMaterials[s.room].length === 0) && (
                         <li className="text-gray-500">Không có vật tư</li>
                       )}
                     </ul>
@@ -584,12 +647,62 @@ const DoctorDashboard = () => {
             </Card>
           </TabsContent>
 
+          <TabsContent value="call-board" className="space-y-6">
+            <Card className="p-6">
+              <h2 className="text-2xl font-bold mb-6 text-center text-blue-700">
+                Màn Hình Gọi Bệnh Nhân Vào Khám
+              </h2>
+              <div className="grid gap-4">
+                {queue.filter((q) => q.status === "called").length === 0 && (
+                  <div className="text-center text-gray-500">
+                    Hiện chưa có bệnh nhân nào được gọi.
+                  </div>
+                )}
+                {queue
+                  .filter((q) => q.status === "called")
+                  .map((patient) => (
+                    <div
+                      key={patient.id}
+                      className="border-l-8 border-blue-600 bg-blue-50 p-4 rounded flex flex-col md:flex-row items-center justify-between shadow"
+                    >
+                      <div className="flex-1">
+                        <span className="block text-lg font-bold text-blue-800 mb-1">
+                          Bệnh nhân: {patient.patientName}
+                        </span>
+                        <span className="block text-gray-700">
+                          Số thứ tự:{" "}
+                          <b className="text-xl">{patient.queueNumber}</b>
+                        </span>
+                      </div>
+                      <div className="flex flex-col items-end gap-1 mt-2 md:mt-0">
+                        <span className="text-blue-700 font-semibold">
+                          Bác sĩ: BS. Nguyễn Văn An{" "}
+                          {/* hoặc lấy từ profile đăng nhập */}
+                        </span>
+                        <span>
+                          Phòng: <b className="text-lg">Phòng 1</b>
+                          {/* Có thể lấy theo lịch làm việc/queue nếu hệ thống có nhiều phòng */}
+                        </span>
+                        <span className="text-green-700 font-semibold">
+                          Vui lòng vào phòng khám
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            </Card>
+          </TabsContent>
         </Tabs>
         {showMaterialModal && selectedMaterial && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white p-6 rounded shadow-lg w-[300px] space-y-4">
-              <h3 className="text-lg font-semibold text-gray-800">Sử dụng vật tư</h3>
-              <p>{selectedMaterial.name} ({selectedMaterial.quantity} {selectedMaterial.unit} còn lại)</p>
+              <h3 className="text-lg font-semibold text-gray-800">
+                Sử dụng vật tư
+              </h3>
+              <p>
+                {selectedMaterial.name} ({selectedMaterial.quantity}{" "}
+                {selectedMaterial.unit} còn lại)
+              </p>
               <Input
                 type="number"
                 placeholder="Nhập số lượng"
@@ -598,8 +711,16 @@ const DoctorDashboard = () => {
                 min={1}
               />
               <div className="flex justify-end gap-2">
-                <Button variant="outline" onClick={() => setShowMaterialModal(false)}>Hủy</Button>
-                <Button onClick={handleUseMaterial} className="bg-blue-600 text-white">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowMaterialModal(false)}
+                >
+                  Hủy
+                </Button>
+                <Button
+                  onClick={handleUseMaterial}
+                  className="bg-blue-600 text-white"
+                >
                   Xác nhận
                 </Button>
               </div>
