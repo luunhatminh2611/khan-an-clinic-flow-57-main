@@ -58,6 +58,8 @@ const mockAppointments = [
     date: new Date().toISOString().split("T")[0],
     symptoms: "Đau đầu, chóng mặt",
     status: "pending",
+    assignedDoctor: undefined, // hoặc null
+    room: undefined, // hoặc null
   },
   {
     id: 2,
@@ -68,7 +70,10 @@ const mockAppointments = [
     date: new Date().toISOString().split("T")[0],
     symptoms: "Mất ngủ",
     status: "checked-in",
+    assignedDoctor: undefined,
+    room: undefined,
   },
+  // ... các object còn lại, thêm 2 thuộc tính này tương tự
   {
     id: 3,
     patientName: "Phạm Văn C",
@@ -82,6 +87,8 @@ const mockAppointments = [
       { name: "Chụp CT", price: 500000 },
       { name: "Điện não đồ", price: 400000 },
     ],
+    assignedDoctor: undefined,
+    room: undefined,
   },
   {
     id: 4,
@@ -92,14 +99,78 @@ const mockAppointments = [
     date: new Date().toISOString().split("T")[0],
     symptoms: "Khó thở",
     status: "waiting-for-confirm",
+    assignedDoctor: undefined,
+    room: undefined,
   },
 ];
+
 
 const mockDoctorsToday = [
   { id: 1, name: "BS. Nguyễn Thị Hạnh", room: "Phòng 1" },
   { id: 2, name: "BS. Trần Văn Nam", room: "Phòng 2" },
   { id: 3, name: "BS. Lê Quang Huy", room: "Phòng 3" },
 ];
+
+// --- MODAL CHỌN PHÒNG & BÁC SĨ ---
+const RoomAssignModal = ({
+  open,
+  onClose,
+  doctors,
+  appointments,
+  onAssign,
+}) => {
+  if (!open) return null;
+
+  const getPatientsInRoom = (room) =>
+    appointments.filter(
+      (a) => a.room === room && a.status === "in-progress"
+    ).length;
+
+  return (
+    <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
+      <div className="bg-white rounded-2xl shadow-xl p-8 min-w-[600px] max-w-2xl">
+        <h2 className="text-2xl font-bold mb-6">Chọn phòng khám & bác sĩ</h2>
+        <table className="w-full text-base mb-6 border">
+          <thead>
+            <tr className="text-left border-b">
+              <th className="py-3 px-3">Phòng</th>
+              <th className="py-3 px-3">Bác sĩ</th>
+              <th className="py-3 px-3">Số BN trong phòng</th>
+              <th className="py-3 px-3">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {doctors.map((doctor) => (
+              <tr key={doctor.id} className="border-b">
+                <td className="py-3 px-3">{doctor.room}</td>
+                <td className="py-3 px-3">{doctor.name}</td>
+                <td className="py-3 px-3">
+                  {getPatientsInRoom(doctor.room)}
+                </td>
+                <td className="py-3 px-3">
+                  <Button
+                    size="lg"
+                    className="bg-blue-600 hover:bg-blue-700 px-6 py-2"
+                    onClick={() => onAssign(doctor)}
+                  >
+                    Chọn
+                  </Button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <div className="flex justify-end">
+          <Button variant="outline" size="lg" onClick={onClose}>
+            Đóng
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// --- END MODAL ---
 
 const ReceptionistDashboard = () => {
   const navigate = useNavigate();
@@ -119,6 +190,10 @@ const ReceptionistDashboard = () => {
     const today = new Date().toISOString().split("T")[0];
     return today;
   });
+
+  // THÊM STATE cho modal chọn phòng
+  const [showRoomAssignModal, setShowRoomAssignModal] = useState(false);
+  const [appointmentToRoomAssign, setAppointmentToRoomAssign] = useState(null);
 
   const [showDoctorAssignModal, setShowDoctorAssignModal] = useState(false);
   const [appointmentToAssign, setAppointmentToAssign] = useState(null);
@@ -206,7 +281,8 @@ const ReceptionistDashboard = () => {
     setShowAppointmentForm(true);
   };
 
-  const handleAssignDoctor = (doctor: Doctor) => {
+  // XÁC NHẬN CHO LỊCH CHỜ
+  const handleAssignDoctor = (doctor) => {
     if (!appointmentToAssign) return;
 
     const updatedAppointments = appointments.map((apt) =>
@@ -223,6 +299,26 @@ const ReceptionistDashboard = () => {
     setAppointments(updatedAppointments);
     setShowDoctorAssignModal(false);
     setAppointmentToAssign(null);
+  };
+
+  // CHỌN PHÒNG & BÁC SĨ KHI VÀO KHÁM
+  const handleAssignRoom = (doctor) => {
+    if (!appointmentToRoomAssign) return;
+
+    const updatedAppointments = appointments.map((apt) =>
+      apt.id === appointmentToRoomAssign.id
+        ? {
+            ...apt,
+            status: "in-progress",
+            assignedDoctor: doctor.name,
+            room: doctor.room,
+          }
+        : apt
+    );
+
+    setAppointments(updatedAppointments);
+    setShowRoomAssignModal(false);
+    setAppointmentToRoomAssign(null);
   };
 
   const handleViewPatientInfo = (appointment) => {
@@ -646,8 +742,10 @@ const ReceptionistDashboard = () => {
                           size="sm"
                           className="bg-green-600 hover:bg-green-700"
                           onClick={() => {
-                            setAppointmentToAssign(appointment);
-                            setShowDoctorAssignModal(true);
+                            updateAppointmentStatus(
+                              appointment.id,
+                              "checked-in"
+                            );
                           }}
                         >
                           <CheckCircle className="w-4 h-4 mr-1" />
@@ -713,6 +811,12 @@ const ReceptionistDashboard = () => {
                         <div>Email: {appointment.email}</div>
                         <div>SĐT: {appointment.phone}</div>
                         <div>Triệu chứng: {appointment.symptoms}</div>
+                        {appointment.room && appointment.assignedDoctor && (
+                          <>
+                            <div>Phòng: {appointment.room}</div>
+                            <div>Bác sĩ: {appointment.assignedDoctor}</div>
+                          </>
+                        )}
                       </div>
                     </div>
 
@@ -760,15 +864,18 @@ const ReceptionistDashboard = () => {
                         <Button
                           size="sm"
                           className="bg-green-600 hover:bg-green-700"
-                          onClick={() =>
-                            updateAppointmentStatus(
-                              appointment.id,
-                              "in-progress"
-                            )
-                          }
+                          onClick={() => {
+                            setAppointmentToRoomAssign(appointment);
+                            setShowRoomAssignModal(true);
+                          }}
                         >
                           Vào Khám
                         </Button>
+                      )}
+                      {appointment.status === "in-progress" && (
+                        <Badge className="bg-green-100 text-green-800">
+                          Đang khám tại {appointment.room} ({appointment.assignedDoctor})
+                        </Badge>
                       )}
                       {appointment.status === "payment-required" && (
                         <Button
@@ -804,11 +911,21 @@ const ReceptionistDashboard = () => {
             />
           </TabsContent>
 
+          {/* Bạn vẫn giữ lại DoctorAssignModal nếu cần cho những logic khác */}
           <DoctorAssignModal
             open={showDoctorAssignModal}
             onClose={() => setShowDoctorAssignModal(false)}
             doctors={mockDoctorsToday}
             onAssign={handleAssignDoctor}
+          />
+
+          {/* Thêm modal chọn phòng và bác sĩ */}
+          <RoomAssignModal
+            open={showRoomAssignModal}
+            onClose={() => setShowRoomAssignModal(false)}
+            doctors={mockDoctorsToday}
+            appointments={appointments}
+            onAssign={handleAssignRoom}
           />
         </Tabs>
       </div>

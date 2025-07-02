@@ -5,6 +5,7 @@ import { FileText, Plus, Trash2 } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 
+// Kết quả chỉ định mẫu
 const mockExamResults = [
   {
     type: 'Xét nghiệm máu',
@@ -18,6 +19,7 @@ const mockExamResults = [
   },
 ];
 
+// Danh sách thuốc nội thần kinh
 const neurologyMedicines = [
   'Paracetamol',
   'Amitriptyline',
@@ -27,9 +29,70 @@ const neurologyMedicines = [
   'Topiramate',
   'Donepezil',
   'Memantine',
+  // Bổ sung 10 thuốc thần kinh phổ biến:
+  'Carbamazepine',        // Thuốc chống động kinh
+  'Valproic acid',        // Thuốc chống động kinh, phòng ngừa đau đầu migraine
+  'Phenytoin',            // Thuốc chống động kinh
+  'Lamotrigine',          // Thuốc chống động kinh
+  'Clonazepam',           // Thuốc an thần, chống co giật
+  'Diazepam',             // Thuốc an thần, giãn cơ
+  'Piracetam',            // Thuốc tăng tuần hoàn não
+  'Cinnarizine',          // Thuốc tăng tuần hoàn não, chóng mặt
+  'Aspirin',              // Thuốc kháng tiểu cầu, phòng ngừa đột quỵ
+  'Vitamin B1',           // Hỗ trợ thần kinh
+  'Vitamin B6',           // Hỗ trợ thần kinh
+  'Vitamin B12',          // Hỗ trợ thần kinh
 ];
 
+
+// Thời gian dùng thuốc
 const durationOptions = ['3 ngày', '5 ngày', '7 ngày', '10 ngày', '14 ngày', '30 ngày'];
+
+// Component Autocomplete input chọn thuốc
+const AutocompleteDrugInput = ({ value, onChange, medicines }) => {
+  const [search, setSearch] = useState(value || '');
+  const [showDropdown, setShowDropdown] = useState(false);
+
+  const filtered = medicines.filter((drug) =>
+    drug.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const handleSelect = (drug) => {
+    setSearch(drug);
+    setShowDropdown(false);
+    onChange(drug);
+  };
+
+  return (
+    <div className="relative w-full">
+      <Input
+        placeholder="Nhập tên thuốc"
+        value={search}
+        onChange={(e) => {
+          setSearch(e.target.value);
+          setShowDropdown(true);
+          onChange(e.target.value);
+        }}
+        onFocus={() => setShowDropdown(true)}
+        onBlur={() => setTimeout(() => setShowDropdown(false), 120)}
+        autoComplete="off"
+      />
+      {showDropdown && search && filtered.length > 0 && (
+        <div className="absolute left-0 right-0 bg-white border rounded shadow z-20 max-h-40 overflow-auto">
+          {filtered.map((drug, idx) => (
+            <div
+              key={idx}
+              className="p-2 cursor-pointer hover:bg-blue-100"
+              onMouseDown={() => handleSelect(drug)}
+            >
+              {drug}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
 
 const TodayVisitResult = ({ patient, onBack, onComplete }) => {
   const [conclusion, setConclusion] = useState('');
@@ -131,19 +194,14 @@ const TodayVisitResult = ({ patient, onBack, onComplete }) => {
 
         {/* Form nhập đơn thuốc */}
         <div className="grid grid-cols-3 gap-2">
-          {/* Dropdown thuốc */}
-          <select
-            className="border rounded px-3 py-2 text-sm"
+          {/* Autocomplete tên thuốc */}
+          <AutocompleteDrugInput
             value={newPrescription.medicineName}
-            onChange={(e) => setNewPrescription({ ...newPrescription, medicineName: e.target.value })}
-          >
-            <option value="">Chọn thuốc</option>
-            {neurologyMedicines.map((med, index) => (
-              <option key={index} value={med}>
-                {med}
-              </option>
-            ))}
-          </select>
+            onChange={(val) =>
+              setNewPrescription({ ...newPrescription, medicineName: val })
+            }
+            medicines={neurologyMedicines}
+          />
 
           {/* Liều dùng */}
           <Input

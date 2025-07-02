@@ -13,14 +13,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import EditLabTestModal from "./EditLabTestModal";
 
 const ExaminationForm = ({
   patient,
   onSave,
   onCancel,
   onStatusChange,
-  initialData = null, // 👈 thêm prop mới
+  initialData = null,
 }) => {
   const [formData, setFormData] = useState({
     symptoms: "",
@@ -32,11 +31,15 @@ const ExaminationForm = ({
   const [selectedRoom, setSelectedRoom] = useState("");
   const [selectedServices, setSelectedServices] = useState([]);
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [editLabTest, setEditLabTest] = useState(null);
+
+  // --- Các state cho chỉnh sửa ---
+  const [editingTest, setEditingTest] = useState(null);
+  const [editRoom, setEditRoom] = useState("");
+  const [editServices, setEditServices] = useState([]);
 
   const { toast } = useToast();
 
-  // 👇 khi có initialData thì gán vào form
+  // Khi có initialData thì gán vào form
   useEffect(() => {
     if (initialData) {
       setFormData({
@@ -103,6 +106,33 @@ const ExaminationForm = ({
       title: "Tạo phiếu khám thành công!",
       description: "Phiếu khám đã được tạo và gửi tới các phòng xét nghiệm.",
     });
+  };
+
+  // --- Xử lý chỉnh sửa chỉ định ---
+  const handleEditClick = (test) => {
+    setEditingTest(test);
+    const editRoomObj = rooms.find((r) => r.name === test.room);
+    setEditRoom(editRoomObj ? editRoomObj.id : "");
+    setEditServices(test.services);
+  };
+
+  const handleEditSave = () => {
+    if (editRoom && editServices.length > 0) {
+      const updatedRoom = rooms.find((r) => r.id === editRoom);
+      const updatedTest = {
+        ...editingTest,
+        room: updatedRoom.name,
+        services: editServices,
+      };
+      setLabTests(labTests.map(t => t.id === editingTest.id ? updatedTest : t));
+      setEditingTest(null);
+      setEditRoom("");
+      setEditServices([]);
+      toast({
+        title: "Đã cập nhật chỉ định!",
+        description: "Chỉ định xét nghiệm đã được cập nhật.",
+      });
+    }
   };
 
   return (
@@ -222,11 +252,10 @@ const ExaminationForm = ({
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => setEditLabTest(test)}
+                      onClick={() => handleEditClick(test)}
                     >
                       Chỉnh sửa
                     </Button>
-
                     <Button
                       size="sm"
                       variant="destructive"
@@ -285,22 +314,70 @@ const ExaminationForm = ({
         </div>
       </form>
 
-      <EditLabTestModal
-        visible={!!editLabTest}
-        test={editLabTest}
-        rooms={rooms}
-        onClose={() => setEditLabTest(null)}
-        onSave={(updated) => {
-          setLabTests((prev) =>
-            prev.map((t) => (t.id === updated.id ? updated : t))
-          );
-          setEditLabTest(null);
-          toast({
-            title: "Đã cập nhật chỉ định!",
-            description: "Thông tin đã được lưu.",
-          });
-        }}
-      />
+      {/* Popup chỉnh sửa chỉ định */}
+      {editingTest && (
+        <div className="fixed inset-0 z-50 bg-black/30 flex items-center justify-center">
+          <div className="bg-white rounded-xl shadow-lg p-6 min-w-[350px]">
+            <h4 className="font-bold mb-4">Chỉnh sửa chỉ định</h4>
+            {/* Chọn lại phòng */}
+            <div className="mb-4">
+              <Label>Chọn phòng xét nghiệm</Label>
+              <Select value={editRoom} onValueChange={setEditRoom}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Chọn phòng" />
+                </SelectTrigger>
+                <SelectContent>
+                  {rooms.map((room) => (
+                    <SelectItem key={room.id} value={room.id}>
+                      {room.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            {/* Chọn lại dịch vụ */}
+            {editRoom && (
+              <div className="mb-4">
+                <Label>Chọn dịch vụ</Label>
+                <div className="grid grid-cols-1 gap-2 mt-2">
+                  {rooms
+                    .find((r) => r.id === editRoom)
+                    ?.services.map((service) => (
+                      <div key={service} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`edit-${service}`}
+                          checked={editServices.includes(service)}
+                          onCheckedChange={(checked) =>
+                            setEditServices((prev) =>
+                              checked
+                                ? [...prev, service]
+                                : prev.filter((s) => s !== service)
+                            )
+                          }
+                        />
+                        <Label htmlFor={`edit-${service}`} className="text-sm">
+                          {service}
+                        </Label>
+                      </div>
+                    ))}
+                </div>
+              </div>
+            )}
+            <div className="flex gap-2 justify-end pt-4">
+              <Button variant="outline" onClick={() => setEditingTest(null)}>
+                Hủy
+              </Button>
+              <Button
+                onClick={handleEditSave}
+                disabled={!editRoom || editServices.length === 0}
+                className="bg-blue-600 hover:bg-blue-700"
+              >
+                Lưu chỉ định
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </Card>
   );
 };
