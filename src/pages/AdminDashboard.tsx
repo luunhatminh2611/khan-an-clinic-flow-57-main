@@ -237,8 +237,7 @@ const AdminDashboard = () => {
             setEditingItem(selectedPatient);
             setSelectedPatient(null);
             setShowForm('patient');
-          }}
-        />
+          } } onCreateMedicalRecord={undefined}        />
       </div>
     );
   }
