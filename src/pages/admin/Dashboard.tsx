@@ -37,11 +37,11 @@ const AdminDashboard: React.FC = () => {
 
   // Top bệnh phổ biến
   const commonDiseases = [
-    { disease: 'Cảm cúm, ĐTHB', count: 45, percentage: 28, trend: 'up' },
-    { disease: 'Đau đầu, Stress', count: 32, percentage: 20, trend: 'stable' },
-    { disease: 'Chứng rối loạn tiền đình', count: 28, percentage: 17, trend: 'up' },
-    { disease: 'Tim mạch', count: 25, percentage: 15, trend: 'down' },
-    { disease: 'Tình trạng chóng mặt ', count: 20, percentage: 12, trend: 'up' },
+    { disease: 'Đột quỵ não', count: 45, percentage: 28, trend: 'up' },
+    { disease: 'Động kinh', count: 32, percentage: 20, trend: 'stable' },
+    { disease: 'Parkinson', count: 28, percentage: 17, trend: 'up' },
+    { disease: 'Đau nửa đầu (Migraine)', count: 25, percentage: 15, trend: 'down' },
+    { disease: 'Rối loạn giấc ngủ', count: 20, percentage: 12, trend: 'up' },
     { disease: 'Khác', count: 13, percentage: 8, trend: 'stable' }
   ];
 
@@ -550,10 +550,10 @@ const AdminDashboard: React.FC = () => {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {/* Cảm cúm, ĐTHB - Tăng */}
+            {/* Đột quỵ não - Tăng */}
             <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-3xl p-8 border-l-4 border-blue-500 hover:shadow-lg transition-all duration-300 h-80 flex flex-col">
               <div className="text-center h-12 flex items-center justify-center mb-6">
-                <h3 className="font-bold text-blue-900 text-xl leading-tight">Chứng rối loạn tiền đình</h3>
+                <h3 className="font-bold text-blue-900 text-xl leading-tight">Đột quỵ não</h3>
               </div>
               <div className="text-center flex-1 flex flex-col justify-center">
                 <div className="text-2xl font-bold text-blue-600 mb-4 leading-none">45</div>
@@ -567,10 +567,10 @@ const AdminDashboard: React.FC = () => {
               </div>
             </div>
 
-            {/* Đau đầu, Stress - Ổn định */}
+            {/* Động kinh - Ổn định */}
             <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-3xl p-8 border-l-4 border-blue-500 hover:shadow-lg transition-all duration-300 h-80 flex flex-col">
               <div className="text-center h-12 flex items-center justify-center mb-6">
-                <h3 className="font-bold text-blue-900 text-xl leading-tight">Đau đầu, Stress</h3>
+                <h3 className="font-bold text-blue-900 text-xl leading-tight">Động kinh</h3>
               </div>
               <div className="text-center flex-1 flex flex-col justify-center">
                 <div className="text-2xl font-bold text-blue-600 mb-4 leading-none">32</div>
@@ -584,10 +584,10 @@ const AdminDashboard: React.FC = () => {
               </div>
             </div>
 
-            {/* Dạ dày, Tiêu hóa - Tăng */}
+            {/* Parkinson - Tăng */}
             <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-3xl p-8 border-l-4 border-blue-500 hover:shadow-lg transition-all duration-300 h-80 flex flex-col">
               <div className="text-center h-12 flex items-center justify-center mb-6">
-                <h3 className="font-bold text-blue-900 text-xl leading-tight">Viêm não màng não</h3>
+                <h3 className="font-bold text-blue-900 text-xl leading-tight">Parkinson</h3>
               </div>
               <div className="text-center flex-1 flex flex-col justify-center">
                 <div className="text-2xl font-bold text-blue-600 mb-4 leading-none">28</div>
@@ -601,10 +601,10 @@ const AdminDashboard: React.FC = () => {
               </div>
             </div>
 
-            {/* Tim mạch - Giảm */}
+            {/* Đau nửa đầu (Migraine) - Giảm */}
             <div className="bg-gradient-to-br from-red-50 to-red-100 rounded-3xl p-8 border-l-4 border-red-500 hover:shadow-lg transition-all duration-300 h-80 flex flex-col">
               <div className="text-center h-12 flex items-center justify-center mb-6">
-                <h3 className="font-bold text-red-900 text-xl leading-tight">Thần kinh liên sườn</h3>
+                <h3 className="font-bold text-red-900 text-xl leading-tight">Đau nửa đầu (Migraine)</h3>
               </div>
               <div className="text-center flex-1 flex flex-col justify-center">
                 <p className="text-5xl font-bold text-red-600 mb-4 leading-none">25</p>
@@ -618,10 +618,10 @@ const AdminDashboard: React.FC = () => {
               </div>
             </div>
 
-            {/* Da liễu - Tăng */}
+            {/* Rối loạn giấc ngủ - Tăng */}
             <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-3xl p-8 border-l-4 border-blue-500 hover:shadow-lg transition-all duration-300 h-80 flex flex-col">
               <div className="text-center h-12 flex items-center justify-center mb-6">
-                <h3 className="font-bold text-blue-900 text-xl leading-tight">Thiếu máu não</h3>
+                <h3 className="font-bold text-blue-900 text-xl leading-tight">Rối loạn giấc ngủ</h3>
               </div>
               <div className="text-center flex-1 flex flex-col justify-center">
                 <p className="text-5xl font-bold text-blue-600 mb-4 leading-none">20</p>
