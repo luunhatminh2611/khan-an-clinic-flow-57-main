@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   User, Calendar, FileText, Clock, Package,
   Upload, Stethoscope, Eye
@@ -25,7 +25,6 @@ const mockQueue = [
     time: "08:30",
     symptoms: "Đau đầu, chóng mặt",
     status: "waiting",
-
   },
   {
     id: 2,
@@ -99,12 +98,12 @@ const mockRoomMaterials = {
   "Phòng A": [
     { id: 1, name: "Găng tay y tế", quantity: 50, unit: "đôi" },
     { id: 2, name: "Khẩu trang", quantity: 100, unit: "cái" },
-    { id: 3, name: "Cồn sát khuẩn", quantity: 5, unit: "chai" }
+    { id: 3, name: "Cồn sát khuẩn", quantity: 5, unit: "chai" },
   ],
   "Phòng B": [
     { id: 4, name: "Bông y tế", quantity: 20, unit: "gói" },
-    { id: 5, name: "Băng gạc", quantity: 15, unit: "cuộn" }
-  ]
+    { id: 5, name: "Băng gạc", quantity: 15, unit: "cuộn" },
+  ],
 };
 
 const DoctorDashboard = () => {
@@ -124,6 +123,7 @@ const DoctorDashboard = () => {
   const [appointments, setAppointments] = useState(mockAppointments);
   const [editingAppointment, setEditingAppointment] = useState(null);
 
+  const [callError, setCallError] = useState("");
 
   const handleUseMaterial = () => {
     if (!selectedRoom || !selectedMaterial) return;
@@ -147,6 +147,25 @@ const DoctorDashboard = () => {
 
   const updateQueueStatus = (id, status) => {
     setQueue(queue.map((q) => (q.id === id ? { ...q, status } : q)));
+  };
+
+  const handleCallPatient = (patient) => {
+    const alreadyCalled = queue.some((q) => q.status === "called");
+    if (alreadyCalled) {
+      setCallError(
+        "Trong phòng có người, vui lòng chờ bệnh nhân hiện tại vào khám trước khi gọi tiếp."
+      );
+      setTimeout(() => setCallError(""), 3000); // Tự động ẩn sau 3 giây
+      return;
+    }
+    setCallError("");
+    updateQueueStatus(patient.id, "called");
+  };
+
+  const handlePatientArrived = (patientId) => {
+    setQueue((prev) =>
+      prev.map((q) => (q.id === patientId ? { ...q, status: "doing" } : q))
+    );
   };
 
   const handleLogout = () => {
@@ -350,7 +369,10 @@ const DoctorDashboard = () => {
               <User className="w-4 h-4" />
               Thông Tin Của Tôi
             </TabsTrigger>
-            <TabsTrigger value="doctor-profile" className="flex items-center gap-2">
+            <TabsTrigger
+              value="doctor-profile"
+              className="flex items-center gap-2"
+            >
               <Stethoscope className="w-4 h-4" />
               Hồ Sơ Bác Sĩ
             </TabsTrigger>
@@ -358,11 +380,17 @@ const DoctorDashboard = () => {
               <Calendar className="w-4 h-4" />
               Lịch Làm
             </TabsTrigger>
-            <TabsTrigger value="examinations" className="flex items-center gap-2">
+            <TabsTrigger
+              value="examinations"
+              className="flex items-center gap-2"
+            >
               <FileText className="w-4 h-4" />
               Lịch Khám
             </TabsTrigger>
-            <TabsTrigger value="room-materials" className="flex items-center gap-2">
+            <TabsTrigger
+              value="room-materials"
+              className="flex items-center gap-2"
+            >
               <Package className="w-4 h-4" />
               Vật Tư Trong Phòng
             </TabsTrigger>
@@ -475,6 +503,11 @@ const DoctorDashboard = () => {
             <h2 className="text-xl font-semibold">Hàng Đợi Khám - Hôm Nay</h2>
             <div className="text-sm text-gray-600">Phòng khám 1</div>
 
+            {/* Thông báo lỗi khi gọi bệnh nhân */}
+            {callError && (
+              <div className="mb-4 text-red-600 font-semibold">{callError}</div>
+            )}
+
             <div className="grid gap-4">
               {queue.map((patient) => (
                 <Card key={patient.id} className="p-6">
@@ -505,7 +538,7 @@ const DoctorDashboard = () => {
                       {["waiting", "finish"].includes(patient.status) && (
                         <Button
                           size="sm"
-                          onClick={() => updateQueueStatus(patient.id, "called")}
+                          onClick={() => handleCallPatient(patient)}
                         >
                           Gọi Bệnh Nhân
                         </Button>
@@ -633,6 +666,7 @@ const DoctorDashboard = () => {
                         <span className="text-green-700 font-semibold">
                           Vui lòng vào phòng khám
                         </span>
+                       
                       </div>
                     </div>
                   ))}

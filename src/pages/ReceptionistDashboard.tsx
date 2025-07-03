@@ -102,8 +102,20 @@ const mockAppointments = [
     assignedDoctor: undefined,
     room: undefined,
   },
+  {
+    id: 5,
+    patientName: "Ngô Thị Y",
+    email: "ngothiy@gmail.com",
+    phone: "0977123456",
+    time: "14:00",
+    date: new Date().toISOString().split("T")[0],
+    symptoms: "Cảm cúm, đau họng",
+    status: "pending",
+    assignedDoctor: undefined,
+    room: undefined,
+    requestedDoctor: "BS. Trần Văn Nam",
+  },
 ];
-
 
 const mockDoctorsToday = [
   { id: 1, name: "BS. Nguyễn Thị Hạnh", room: "Phòng 1" },
@@ -118,18 +130,36 @@ const RoomAssignModal = ({
   doctors,
   appointments,
   onAssign,
+  roomAssignError,
+  setRoomAssignError,
+  appointmentToRoomAssign, // <-- thêm dòng này!
 }) => {
   if (!open) return null;
 
+  // Đếm số BN đang khám trong phòng
   const getPatientsInRoom = (room) =>
-    appointments.filter(
-      (a) => a.room === room && a.status === "in-progress"
-    ).length;
+    appointments.filter((a) => a.room === room && a.status === "in-progress")
+      .length;
+
+  // Khi bấm "Chọn"
+  const handleChoose = (doctor) => {
+    if (getPatientsInRoom(doctor.room) >= 1) {
+      setRoomAssignError("Phòng đã có người, vui lòng chọn phòng khác");
+      return;
+    }
+    setRoomAssignError("");
+    onAssign(doctor);
+  };
 
   return (
     <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
       <div className="bg-white rounded-2xl shadow-xl p-8 min-w-[600px] max-w-2xl">
         <h2 className="text-2xl font-bold mb-6">Chọn phòng khám & bác sĩ</h2>
+        {roomAssignError && (
+          <div className="mb-4 text-red-600 font-semibold">
+            {roomAssignError}
+          </div>
+        )}
         <table className="w-full text-base mb-6 border">
           <thead>
             <tr className="text-left border-b">
@@ -141,17 +171,29 @@ const RoomAssignModal = ({
           </thead>
           <tbody>
             {doctors.map((doctor) => (
-              <tr key={doctor.id} className="border-b">
+              <tr
+                key={doctor.id}
+                className={`border-b ${
+                  appointmentToRoomAssign?.requestedDoctor === doctor.name
+                    ? "bg-blue-50 font-semibold"
+                    : ""
+                }`}
+              >
                 <td className="py-3 px-3">{doctor.room}</td>
-                <td className="py-3 px-3">{doctor.name}</td>
                 <td className="py-3 px-3">
-                  {getPatientsInRoom(doctor.room)}
+                  {doctor.name}
+                  {appointmentToRoomAssign?.requestedDoctor === doctor.name && (
+                    <span className="ml-2 px-2 py-0.5 text-xs rounded bg-blue-200 text-blue-900">
+                      Ưu tiên
+                    </span>
+                  )}
                 </td>
+                <td className="py-3 px-3">{getPatientsInRoom(doctor.room)}</td>
                 <td className="py-3 px-3">
                   <Button
                     size="lg"
                     className="bg-blue-600 hover:bg-blue-700 px-6 py-2"
-                    onClick={() => onAssign(doctor)}
+                    onClick={() => handleChoose(doctor)}
                   >
                     Chọn
                   </Button>
@@ -161,7 +203,14 @@ const RoomAssignModal = ({
           </tbody>
         </table>
         <div className="flex justify-end">
-          <Button variant="outline" size="lg" onClick={onClose}>
+          <Button
+            variant="outline"
+            size="lg"
+            onClick={() => {
+              setRoomAssignError("");
+              onClose();
+            }}
+          >
             Đóng
           </Button>
         </div>
@@ -194,6 +243,7 @@ const ReceptionistDashboard = () => {
   // THÊM STATE cho modal chọn phòng
   const [showRoomAssignModal, setShowRoomAssignModal] = useState(false);
   const [appointmentToRoomAssign, setAppointmentToRoomAssign] = useState(null);
+  const [roomAssignError, setRoomAssignError] = useState(""); // <-- Thêm dòng này ở đây
 
   const [showDoctorAssignModal, setShowDoctorAssignModal] = useState(false);
   const [appointmentToAssign, setAppointmentToAssign] = useState(null);
@@ -811,6 +861,14 @@ const ReceptionistDashboard = () => {
                         <div>Email: {appointment.email}</div>
                         <div>SĐT: {appointment.phone}</div>
                         <div>Triệu chứng: {appointment.symptoms}</div>
+                        {appointment.requestedDoctor && (
+                          <div>
+                            <span className="font-semibold text-blue-700">
+                              Bác sĩ yêu cầu:
+                            </span>{" "}
+                            {appointment.requestedDoctor}
+                          </div>
+                        )}
                         {appointment.room && appointment.assignedDoctor && (
                           <>
                             <div>Phòng: {appointment.room}</div>
@@ -874,7 +932,8 @@ const ReceptionistDashboard = () => {
                       )}
                       {appointment.status === "in-progress" && (
                         <Badge className="bg-green-100 text-green-800">
-                          Đang khám tại {appointment.room} ({appointment.assignedDoctor})
+                          Đang khám tại {appointment.room} (
+                          {appointment.assignedDoctor})
                         </Badge>
                       )}
                       {appointment.status === "payment-required" && (
@@ -922,10 +981,16 @@ const ReceptionistDashboard = () => {
           {/* Thêm modal chọn phòng và bác sĩ */}
           <RoomAssignModal
             open={showRoomAssignModal}
-            onClose={() => setShowRoomAssignModal(false)}
+            onClose={() => {
+              setShowRoomAssignModal(false);
+              setRoomAssignError(""); // reset lỗi khi đóng modal
+            }}
             doctors={mockDoctorsToday}
             appointments={appointments}
             onAssign={handleAssignRoom}
+            roomAssignError={roomAssignError}
+            setRoomAssignError={setRoomAssignError}
+            appointmentToRoomAssign={appointmentToRoomAssign}
           />
         </Tabs>
       </div>
