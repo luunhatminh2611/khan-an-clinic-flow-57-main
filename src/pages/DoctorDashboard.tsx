@@ -1,16 +1,22 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
-  User, Calendar, FileText, Clock, Package,
-  Upload, Stethoscope, Eye
-} from 'lucide-react';
-import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import DoctorScheduleTab from './DoctorScheduleTab';
+  User,
+  Calendar,
+  FileText,
+  Clock,
+  Package,
+  Upload,
+  Stethoscope,
+  Eye,
+} from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import DoctorScheduleTab from "./DoctorScheduleTab";
 
 // Mock data
 const mockQueue = [
@@ -20,7 +26,7 @@ const mockQueue = [
     patientName: "Nguyễn Văn A",
     time: "08:30",
     symptoms: "Đau đầu, chóng mặt",
-    status: "waiting"
+    status: "waiting",
   },
   {
     id: 2,
@@ -28,7 +34,7 @@ const mockQueue = [
     patientName: "Trần Thị B",
     time: "09:00",
     symptoms: "Mất ngủ, lo âu",
-    status: "called"
+    status: "called",
   },
   {
     id: 3,
@@ -36,20 +42,20 @@ const mockQueue = [
     patientName: "Lê Văn C",
     time: "09:30",
     symptoms: "Kiểm tra định kỳ",
-    status: "doing"
-  }
+    status: "doing",
+  },
 ];
 
 const mockRoomMaterials = {
   "Phòng A": [
     { id: 1, name: "Găng tay y tế", quantity: 50, unit: "đôi" },
     { id: 2, name: "Khẩu trang", quantity: 100, unit: "cái" },
-    { id: 3, name: "Cồn sát khuẩn", quantity: 5, unit: "chai" }
+    { id: 3, name: "Cồn sát khuẩn", quantity: 5, unit: "chai" },
   ],
   "Phòng B": [
     { id: 4, name: "Bông y tế", quantity: 20, unit: "gói" },
-    { id: 5, name: "Băng gạc", quantity: 15, unit: "cuộn" }
-  ]
+    { id: 5, name: "Băng gạc", quantity: 15, unit: "cuộn" },
+  ],
 };
 
 const DoctorDashboard = () => {
@@ -62,6 +68,7 @@ const DoctorDashboard = () => {
   const [selectedMaterial, setSelectedMaterial] = useState(null);
   const [usedQuantity, setUsedQuantity] = useState("");
   const [roomMaterials, setRoomMaterials] = useState(mockRoomMaterials);
+  const [callError, setCallError] = useState("");
 
   const handleUseMaterial = () => {
     if (!selectedRoom || !selectedMaterial) return;
@@ -87,29 +94,60 @@ const DoctorDashboard = () => {
     setQueue(queue.map((q) => (q.id === id ? { ...q, status } : q)));
   };
 
+  const handleCallPatient = (patient) => {
+    const alreadyCalled = queue.some((q) => q.status === "called");
+    if (alreadyCalled) {
+      setCallError(
+        "Trong phòng có người, vui lòng chờ bệnh nhân hiện tại vào khám trước khi gọi tiếp."
+      );
+      setTimeout(() => setCallError(""), 3000); // Tự động ẩn sau 3 giây
+      return;
+    }
+    setCallError("");
+    updateQueueStatus(patient.id, "called");
+  };
+
+  const handlePatientArrived = (patientId) => {
+    setQueue((prev) =>
+      prev.map((q) => (q.id === patientId ? { ...q, status: "doing" } : q))
+    );
+  };
+
   const handleLogout = () => {
     navigate("/");
   };
 
   const getQueueStatusColor = (status) => {
     switch (status) {
-      case "waiting": return "bg-yellow-100 text-yellow-800";
-      case "called": return "bg-blue-100 text-blue-800";
-      case "doing": return "bg-purple-100 text-purple-800";
-      case "completed": return "bg-green-100 text-green-800";
-      case "canceled": return "bg-red-100 text-red-800";
-      default: return "bg-gray-100 text-gray-800";
+      case "waiting":
+        return "bg-yellow-100 text-yellow-800";
+      case "called":
+        return "bg-blue-100 text-blue-800";
+      case "doing":
+        return "bg-purple-100 text-purple-800";
+      case "completed":
+        return "bg-green-100 text-green-800";
+      case "canceled":
+        return "bg-red-100 text-red-800";
+      default:
+        return "bg-gray-100 text-gray-800";
     }
   };
 
   const getQueueStatusText = (status) => {
     switch (status) {
-      case "waiting": return "Đang chờ";
-      case "called": return "Đã gọi";
-      case "doing": return "Đang làm chỉ định";
-      case "completed": return "Hoàn thành";
-      case "canceled": return "Đã hủy";
-      default: return status;
+      case "waiting":
+        return "Đang chờ";
+      case "called":
+        return "Đã gọi";
+      case "doing":
+        return "Đang làm chỉ định";
+      case "completed":
+        return "Hoàn thành";
+      case "canceled":
+        return "Đã hủy";
+      default:
+        return status;
     }
   };
 
@@ -146,7 +184,10 @@ const DoctorDashboard = () => {
               <User className="w-4 h-4" />
               Thông Tin Của Tôi
             </TabsTrigger>
-            <TabsTrigger value="doctor-profile" className="flex items-center gap-2">
+            <TabsTrigger
+              value="doctor-profile"
+              className="flex items-center gap-2"
+            >
               <Stethoscope className="w-4 h-4" />
               Hồ Sơ Bác Sĩ
             </TabsTrigger>
@@ -154,11 +195,17 @@ const DoctorDashboard = () => {
               <Calendar className="w-4 h-4" />
               Lịch Làm
             </TabsTrigger>
-            <TabsTrigger value="examinations" className="flex items-center gap-2">
+            <TabsTrigger
+              value="examinations"
+              className="flex items-center gap-2"
+            >
               <FileText className="w-4 h-4" />
               Lịch Khám
             </TabsTrigger>
-            <TabsTrigger value="room-materials" className="flex items-center gap-2">
+            <TabsTrigger
+              value="room-materials"
+              className="flex items-center gap-2"
+            >
               <Package className="w-4 h-4" />
               Vật Tư Trong Phòng
             </TabsTrigger>
@@ -271,6 +318,11 @@ const DoctorDashboard = () => {
             <h2 className="text-xl font-semibold">Hàng Đợi Khám - Hôm Nay</h2>
             <div className="text-sm text-gray-600">Phòng khám 1</div>
 
+            {/* Thông báo lỗi khi gọi bệnh nhân */}
+            {callError && (
+              <div className="mb-4 text-red-600 font-semibold">{callError}</div>
+            )}
+
             <div className="grid gap-4">
               {queue.map((patient) => (
                 <Card key={patient.id} className="p-6">
@@ -301,7 +353,7 @@ const DoctorDashboard = () => {
                       {["waiting", "doing"].includes(patient.status) && (
                         <Button
                           size="sm"
-                          onClick={() => updateQueueStatus(patient.id, "called")}
+                          onClick={() => handleCallPatient(patient)}
                         >
                           Gọi Bệnh Nhân
                         </Button>
@@ -309,10 +361,7 @@ const DoctorDashboard = () => {
 
                       {["called", "doing"].includes(patient.status) && (
                         <div className="space-x-2">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                          >
+                          <Button size="sm" variant="outline">
                             <Eye className="w-4 h-4 mr-1" />
                             Xem Hồ Sơ
                           </Button>
@@ -406,6 +455,12 @@ const DoctorDashboard = () => {
                         <span className="text-green-700 font-semibold">
                           Vui lòng vào phòng khám
                         </span>
+                        <button
+                          className="mt-2 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 font-semibold"
+                          onClick={() => handlePatientArrived(patient.id)}
+                        >
+                          Đã Gọi
+                        </button>
                       </div>
                     </div>
                   ))}
