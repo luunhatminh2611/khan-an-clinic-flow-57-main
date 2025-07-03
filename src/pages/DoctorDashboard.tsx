@@ -1,22 +1,20 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  User,
-  Calendar,
-  FileText,
-  Clock,
-  Package,
-  Upload,
-  Stethoscope,
-  Eye,
-} from "lucide-react";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import DoctorScheduleTab from "./DoctorScheduleTab";
+  User, Calendar, FileText, Clock, Package,
+  Upload, Stethoscope, Eye
+} from 'lucide-react';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import DoctorScheduleTab from './DoctorScheduleTab';
+import TodayVisitResult from "@/components/TodayResult";
+import PatientDetail from "@/components/PatientDetail";
+import ExaminationForm from "@/components/ExaminationForm";
+import AppointmentForm from "@/components/AppointmentForm";
 
 // Mock data
 const mockQueue = [
@@ -35,6 +33,11 @@ const mockQueue = [
     time: "09:00",
     symptoms: "Mất ngủ, lo âu",
     status: "called",
+    examinationForm: {
+      diagnosis: "Thiếu máu não",
+      note: "Cần nghỉ ngơi",
+      doctor: "BS. Nguyễn Văn An"
+    }
   },
   {
     id: 3,
@@ -42,7 +45,52 @@ const mockQueue = [
     patientName: "Lê Văn C",
     time: "09:30",
     symptoms: "Kiểm tra định kỳ",
-    status: "doing",
+    status: "doing"
+  },
+  {
+    id: 4,
+    queueNumber: 3,
+    patientName: "Lê Văn C",
+    time: "09:30",
+    symptoms: "Kiểm tra định kỳ",
+    status: "finish"
+  }
+];
+
+const mockAppointments = [
+  {
+    id: 1,
+    patientName: "Nguyễn Văn A",
+    email: "nguyenvana@gmail.com",
+    phone: "0901234567",
+    time: "08:00",
+    date: "2024-01-15",
+    symptoms: "Đau đầu, chóng mặt",
+    status: "pending",
+  },
+  {
+    id: 2,
+    patientName: "Trần Thị B",
+    email: "tranthib@gmail.com",
+    phone: "0912345678",
+    time: "09:00",
+    date: "2024-01-15",
+    symptoms: "Mất ngủ",
+    status: "checked-in",
+  },
+  {
+    id: 3,
+    patientName: "Phạm Văn C",
+    email: "phamvanc@gmail.com",
+    phone: "0988888888",
+    time: "10:00",
+    date: "2024-01-15",
+    symptoms: "Tê tay, đau vai gáy",
+    status: "payment-required",
+    services: [
+      { name: "Chụp CT", price: 500000 },
+      { name: "Điện não đồ", price: 400000 },
+    ],
   },
 ];
 
@@ -68,6 +116,13 @@ const DoctorDashboard = () => {
   const [selectedMaterial, setSelectedMaterial] = useState(null);
   const [usedQuantity, setUsedQuantity] = useState("");
   const [roomMaterials, setRoomMaterials] = useState(mockRoomMaterials);
+  const [showResultLookup, setShowResultLookup] = useState(false);
+  const [showPatientDetail, setShowPatientDetail] = useState(false);
+  const [showExaminationForm, setShowExaminationForm] = useState(false);
+  const [showAppointmentForm, setShowAppointmentForm] = useState(false);
+  const [appointments, setAppointments] = useState(mockAppointments);
+  const [editingAppointment, setEditingAppointment] = useState(null);
+
   const [callError, setCallError] = useState("");
 
   const handleUseMaterial = () => {
@@ -119,37 +174,167 @@ const DoctorDashboard = () => {
 
   const getQueueStatusColor = (status) => {
     switch (status) {
-      case "waiting":
-        return "bg-yellow-100 text-yellow-800";
-      case "called":
-        return "bg-blue-100 text-blue-800";
-      case "doing":
-        return "bg-purple-100 text-purple-800";
-      case "completed":
-        return "bg-green-100 text-green-800";
-      case "canceled":
-        return "bg-red-100 text-red-800";
-      default:
-        return "bg-gray-100 text-gray-800";
+      case "waiting": return "bg-yellow-100 text-yellow-800";
+      case "called": return "bg-blue-100 text-blue-800";
+      case "doing": return "bg-purple-100 text-purple-800";
+      case "completed": return "bg-green-100 text-green-800";
+      case "canceled": return "bg-red-100 text-red-800";
+      case "finish": return "bg-red-100 text-red-800";
+      default: return "bg-gray-100 text-gray-800";
     }
   };
 
   const getQueueStatusText = (status) => {
     switch (status) {
-      case "waiting":
-        return "Đang chờ";
-      case "called":
-        return "Đã gọi";
-      case "doing":
-        return "Đang làm chỉ định";
-      case "completed":
-        return "Hoàn thành";
-      case "canceled":
-        return "Đã hủy";
-      default:
-        return status;
+      case "waiting": return "Đang chờ";
+      case "called": return "Đã gọi";
+      case "doing": return "Đang làm chỉ định";
+      case "completed": return "Hoàn thành";
+      case "canceled": return "Đã hủy";
+      case "finish": return "Hoàn thành chỉ định";
+
+      default: return status;
     }
   };
+
+  const handleViewPatient = (patient) => {
+    setSelectedPatient(patient);
+    setShowPatientDetail(true);
+  };
+
+  const handleCreateExamination = (patient) => {
+    setSelectedPatient(patient);
+    setShowExaminationForm(true);
+  };
+
+  const handleExaminationSave = (data) => {
+    setQueue((prevQueue) =>
+      prevQueue.map((q) =>
+        q.id === selectedPatient.id
+          ? { ...q, examinationForm: data }
+          : q
+      )
+    );
+    setShowExaminationForm(false);
+    setSelectedPatient(null);
+  };
+
+  const handleCreateAppointment = (patient = null) => {
+    setSelectedPatient(patient);
+    setShowAppointmentForm(true);
+  };
+
+  const handleCompleteExamination = (patientId) => {
+    setQueue((prevQueue) =>
+      prevQueue.map((p) =>
+        p.id === patientId ? { ...p, status: "completed" } : p
+      )
+    );
+  };
+
+  const handleAppointmentSave = (appointmentData) => {
+    if (editingAppointment) {
+      setAppointments(
+        appointments.map((a) =>
+          a.id === editingAppointment.id
+            ? { ...editingAppointment, ...appointmentData }
+            : a
+        )
+      );
+    } else {
+      setAppointments([
+        ...appointments,
+        { id: Date.now(), ...appointmentData, status: "pending" },
+      ]);
+    }
+    setShowAppointmentForm(false);
+    setEditingAppointment(null);
+    setSelectedPatient(null);
+  };
+
+  if (showResultLookup && selectedPatient) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-6">
+        <div className="container mx-auto">
+          <TodayVisitResult
+            patient={selectedPatient}
+            onBack={() => {
+              setSelectedPatient(null);
+            }}
+            onComplete={() => handleCompleteExamination(selectedPatient.id)}
+            onCompleteSchedule={() => {
+              handleCreateAppointment(selectedPatient);
+              handleCompleteExamination(selectedPatient.id);
+            }} />
+        </div>
+      </div>
+    );
+  }
+
+  if (showPatientDetail) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-6">
+        <div className="container mx-auto">
+          <PatientDetail
+            patient={selectedPatient}
+            onBack={() => {
+              setShowPatientDetail(false);
+              setSelectedPatient(null);
+            }}
+            onEdit={() => {
+              console.log("Edit patient");
+            }}
+            onCreateMedicalRecord
+          />
+        </div>
+      </div>
+    );
+  }
+
+  if (showExaminationForm) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-6">
+        <div className="container mx-auto">
+          <ExaminationForm
+            patient={selectedPatient}
+            initialData={selectedPatient?.examinationForm || null}
+
+            onSave={handleExaminationSave}
+            onCancel={() => {
+              setShowExaminationForm(false);
+              setSelectedPatient(null);
+            }}
+            onStatusChange={(newStatus) => {
+              setQueue((prevQueue) =>
+                prevQueue.map((p) =>
+                  p.id === selectedPatient.id ? { ...p, status: newStatus } : p
+                )
+              );
+            }}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  if (showAppointmentForm) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-6">
+        <div className="container mx-auto">
+          <AppointmentForm
+            appointment={editingAppointment}
+            patient={selectedPatient}
+            onSave={handleAppointmentSave}
+            onCancel={() => {
+              setShowAppointmentForm(false);
+              setEditingAppointment(null);
+              setSelectedPatient(null);
+            }}
+          />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -349,8 +534,8 @@ const DoctorDashboard = () => {
                       </div>
                     </div>
 
-                    <div className="flex gap-2">
-                      {["waiting", "doing"].includes(patient.status) && (
+                    <div className="flex flex-wrap justify-center gap-2">
+                      {["waiting", "finish"].includes(patient.status) && (
                         <Button
                           size="sm"
                           onClick={() => handleCallPatient(patient)}
@@ -359,19 +544,45 @@ const DoctorDashboard = () => {
                         </Button>
                       )}
 
-                      {["called", "doing"].includes(patient.status) && (
-                        <div className="space-x-2">
-                          <Button size="sm" variant="outline">
+                      {["called", "doing", "finish"].includes(patient.status) && (
+                        <>
+                          <Button
+                            size="sm"
+                            className="bg-black hover:bg-green-700 text-white"
+                            onClick={() => {
+                              setSelectedPatient(patient);
+                              setShowResultLookup(true);
+                            }}
+                          >
+                            Xem kết quả
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleViewPatient(patient)}
+                          >
                             <Eye className="w-4 h-4 mr-1" />
                             Xem Hồ Sơ
                           </Button>
                           <Button
                             size="sm"
                             className="bg-green-600 hover:bg-green-700"
+                            onClick={() => handleCreateExamination(patient)}
                           >
-                            Tạo Phiếu Khám
+                            {patient.examinationForm ? "Chỉnh Sửa Phiếu Khám" : "Tạo Phiếu Khám"}          
                           </Button>
-                        </div>
+                        </>
+                      )}
+
+                      {patient.status === "completed" && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleCreateAppointment(patient)}
+                        >
+                          <Calendar className="w-4 h-4 mr-2" />
+                          Đặt Lịch Tái Khám
+                        </Button>
                       )}
                     </div>
                   </div>
@@ -455,12 +666,7 @@ const DoctorDashboard = () => {
                         <span className="text-green-700 font-semibold">
                           Vui lòng vào phòng khám
                         </span>
-                        <button
-                          className="mt-2 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 font-semibold"
-                          onClick={() => handlePatientArrived(patient.id)}
-                        >
-                          Đã Gọi
-                        </button>
+                       
                       </div>
                     </div>
                   ))}

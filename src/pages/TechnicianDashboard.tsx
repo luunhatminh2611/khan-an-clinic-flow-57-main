@@ -25,16 +25,23 @@ const mockLabTests = [
     orderTime: '08:30',
     status: 'waiting',
     doctorName: 'BS. Nguyễn Văn An',
-    room: 'Phòng CT'
+    room: 'Phòng CT',
+    resultData: null,
+
   },
   {
     id: 2,
     patientName: 'Trần Thị B',
     testType: 'Siêu âm Doppler',
     orderTime: '09:00',
-    status: 'in-progress',
+    status: 'completed',
     doctorName: 'BS. Trần Thị Bình',
-    room: 'Phòng siêu âm'
+    room: 'Phòng siêu âm',
+    resultData: {
+      files: [],
+      results: 'Không có bất thường',
+      notes: 'Bệnh nhân cần theo dõi thêm',
+    },
   },
 ];
 
@@ -78,7 +85,17 @@ const TechnicianDashboard = () => {
 
   const handleUploadSave = (uploadData) => {
     console.log('Upload data saved:', uploadData);
-    updateTestStatus(selectedTest.id, 'completed');
+    setLabTests((prevTests) =>
+      prevTests.map((test) =>
+        test.id === selectedTest.id
+          ? {
+            ...test,
+            resultData: uploadData,
+            status: 'completed',
+          }
+          : test
+      )
+    );
     setShowUploadForm(false);
     setSelectedTest(null);
   };
@@ -93,6 +110,7 @@ const TechnicianDashboard = () => {
         <div className="container mx-auto">
           <FileUploadForm
             test={selectedTest}
+            initialData={selectedTest?.resultData || null}  // <-- Truyền dữ liệu có sẵn nếu có
             onSave={handleUploadSave}
             onCancel={() => {
               setShowUploadForm(false);
@@ -227,9 +245,13 @@ const TechnicianDashboard = () => {
                       )}
 
                       {test.status === 'completed' && (
-                        <Button size="sm" variant="outline">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleUploadResults(test)} 
+                        >
                           <Eye className="w-4 h-4 mr-1" />
-                          Xem Kết Quả
+                          Xem / Chỉnh sửa Kết Quả
                         </Button>
                       )}
                     </div>
