@@ -7,7 +7,7 @@ interface ScheduleItem {
   id: number;
   day: string;
   date: string;
-  shift: 'morning' | 'afternoon';
+  shift: 'morning' | 'afternoon' | 'evening';
   shiftTime: string;
   room: string;
   doctorName: string;

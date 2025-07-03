@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import WeeklyScheduleGrid from '../components/WeeklyScheduleGrid';
 import { toast } from '@/hooks/use-toast';
 
-// Mock data cho lịch làm việc
+// Mock data cho lịch làm việc - bao gồm tất cả bác sĩ
 const mockScheduleData = [
+  // Bác sĩ Nguyễn Văn An (ID: 1)
   {
     id: 1,
     day: 'monday',
@@ -17,28 +18,6 @@ const mockScheduleData = [
   },
   {
     id: 2,
-    day: 'monday',
-    date: '2025-06-23',
-    shift: 'afternoon' as const,
-    shiftTime: '13:30 - 17:30',
-    room: 'Phòng B',
-    doctorName: 'BS. Trần Thị Bình',
-    doctorId: 2,
-    status: 'assigned' as const
-  },
-  {
-    id: 3,
-    day: 'tuesday',
-    date: '2025-06-24',
-    shift: 'morning' as const,
-    shiftTime: '8:00 - 12:00',
-    room: 'Phòng C',
-    doctorName: 'BS. Lê Văn Cường',
-    doctorId: 3,
-    status: 'assigned' as const
-  },
-  {
-    id: 4,
     day: 'wednesday',
     date: '2025-06-25',
     shift: 'afternoon' as const,
@@ -49,9 +28,92 @@ const mockScheduleData = [
     status: 'assigned' as const
   },
   {
+    id: 3,
+    day: 'friday',
+    date: '2025-06-27',
+    shift: 'morning' as const,
+    shiftTime: '8:00 - 12:00',
+    room: 'Phòng C',
+    doctorName: 'BS. Nguyễn Văn An',
+    doctorId: 1,
+    status: 'assigned' as const
+  },
+
+  // Bác sĩ Trần Thị Bình (ID: 2)
+  {
+    id: 4,
+    day: 'monday',
+    date: '2025-06-23',
+    shift: 'afternoon' as const,
+    shiftTime: '13:30 - 17:30',
+    room: 'Phòng B',  
+    doctorName: 'BS. Trần Thị Bình',
+    doctorId: 2,
+    status: 'assigned' as const
+  },
+  {
     id: 5,
+    day: 'tuesday',
+    date: '2025-06-24',
+    shift: 'morning' as const,
+    shiftTime: '8:00 - 12:00',
+    room: 'Phòng D',
+    doctorName: 'BS. Trần Thị Bình',
+    doctorId: 2,
+    status: 'assigned' as const
+  },
+  {
+    id: 6,
     day: 'thursday',
     date: '2025-06-26',
+    shift: 'afternoon' as const,
+    shiftTime: '13:30 - 17:30',
+    room: 'Phòng B',
+    doctorName: 'BS. Trần Thị Bình',
+    doctorId: 2,
+    status: 'assigned' as const
+  },
+
+  // Bác sĩ Lê Văn Cường (ID: 3)
+  {
+    id: 7,
+    day: 'tuesday',
+    date: '2025-06-24',
+    shift: 'afternoon' as const,
+    shiftTime: '13:30 - 17:30',
+    room: 'Phòng C',
+    doctorName: 'BS. Lê Văn Cường',
+    doctorId: 3,
+    status: 'assigned' as const
+  },
+  {
+    id: 8,
+    day: 'wednesday',
+    date: '2025-06-25',
+    shift: 'morning' as const,
+    shiftTime: '8:00 - 12:00',
+    room: 'Phòng D',
+    doctorName: 'BS. Lê Văn Cường',
+    doctorId: 3,
+    status: 'assigned' as const
+  },
+  {
+    id: 9,
+    day: 'friday',
+    date: '2025-06-27',
+    shift: 'afternoon' as const,
+    shiftTime: '13:30 - 17:30',
+    room: 'Phòng A',
+    doctorName: 'BS. Lê Văn Cường',
+    doctorId: 3,
+    status: 'assigned' as const
+  },
+
+  // Bác sĩ Phạm Thị Dung (ID: 4)
+  {
+    id: 10,
+    day: 'monday',
+    date: '2025-06-23',
     shift: 'morning' as const,
     shiftTime: '8:00 - 12:00',
     room: 'Phòng D',
@@ -60,14 +122,153 @@ const mockScheduleData = [
     status: 'assigned' as const
   },
   {
-    id: 6,
-    day: 'friday',
-    date: '2025-06-27',
+    id: 11,
+    day: 'thursday',
+    date: '2025-06-26',
+    shift: 'morning' as const,
+    shiftTime: '8:00 - 12:00',
+    room: 'Phòng C',
+    doctorName: 'BS. Phạm Thị Dung',
+    doctorId: 4,
+    status: 'assigned' as const
+  },
+  {
+    id: 12,
+    day: 'saturday',
+    date: '2025-06-28',
+    shift: 'morning' as const,
+    shiftTime: '8:00 - 12:00',
+    room: 'Phòng B',
+    doctorName: 'BS. Phạm Thị Dung',
+    doctorId: 4,
+    status: 'assigned' as const
+  },
+
+  // Bác sĩ Hoàng Văn Tuấn (ID: 5)
+  {
+    id: 13,
+    day: 'tuesday',
+    date: '2025-06-24',
     shift: 'afternoon' as const,
     shiftTime: '13:30 - 17:30',
+    room: 'Phòng A',
+    doctorName: 'BS. Hoàng Văn Tuấn',
+    doctorId: 5,
+    status: 'assigned' as const
+  },
+  {
+    id: 14,
+    day: 'thursday',
+    date: '2025-06-26',
+    shift: 'afternoon' as const,
+    shiftTime: '13:30 - 17:30',
+    room: 'Phòng D',
+    doctorName: 'BS. Hoàng Văn Tuấn',
+    doctorId: 5,
+    status: 'assigned' as const
+  },
+  {
+    id: 15,
+    day: 'saturday',
+    date: '2025-06-28',
+    shift: 'afternoon' as const,
+    shiftTime: '13:30 - 17:30',
+    room: 'Phòng C',
+    doctorName: 'BS. Hoàng Văn Tuấn',
+    doctorId: 5,
+    status: 'assigned' as const
+  },
+
+  // Thêm nhiều bác sĩ trong cùng ca sáng thứ 7 để test giao diện
+  // Bác sĩ Vũ Thị Mai (ID: 6) - Phòng A
+  {
+    id: 16,
+    day: 'saturday',
+    date: '2025-06-28',
+    shift: 'morning' as const,
+    shiftTime: '8:00 - 12:00',
+    room: 'Phòng A',
+    doctorName: 'BS. Vũ Thị Mai',
+    doctorId: 6,
+    status: 'assigned' as const
+  },
+
+  // Bác sĩ Đỗ Văn Nam (ID: 7) - Phòng C  
+  {
+    id: 17,
+    day: 'saturday',
+    date: '2025-06-28',
+    shift: 'morning' as const,
+    shiftTime: '8:00 - 12:00',
+    room: 'Phòng C',
+    doctorName: 'BS. Đỗ Văn Nam',
+    doctorId: 7,
+    status: 'assigned' as const
+  },
+
+  // Bác sĩ Nguyễn Thị Lan (ID: 8) - Phòng D
+  {
+    id: 18,
+    day: 'saturday',
+    date: '2025-06-28',
+    shift: 'morning' as const,
+    shiftTime: '8:00 - 12:00',
+    room: 'Phòng D',
+    doctorName: 'BS. Nguyễn Thị Lan',
+    doctorId: 8,
+    status: 'assigned' as const
+  },
+
+  // Bác sĩ Trần Văn Phong (ID: 9) - Phòng E
+  {
+    id: 19,
+    day: 'saturday',
+    date: '2025-06-28',
+    shift: 'morning' as const,
+    shiftTime: '8:00 - 12:00',
+    room: 'Phòng E',
+    doctorName: 'BS. Trần Văn Phong',
+    doctorId: 9,
+    status: 'assigned' as const
+  },
+
+  // Thêm ca tối để test giao diện
+  // Ca tối thứ 2
+  {
+    id: 20,
+    day: 'monday',
+    date: '2025-06-23',
+    shift: 'evening' as const,
+    shiftTime: '18:00 - 22:00',
+    room: 'Phòng A',
+    doctorName: 'BS. Nguyễn Văn An',
+    doctorId: 1,
+    status: 'assigned' as const
+  },
+
+  // Ca tối thứ 3
+  {
+    id: 21,
+    day: 'tuesday',
+    date: '2025-06-24',
+    shift: 'evening' as const,
+    shiftTime: '18:00 - 22:00',
     room: 'Phòng B',
     doctorName: 'BS. Trần Thị Bình',
     doctorId: 2,
+    status: 'assigned' as const
+  },
+
+  // Ca tối thứ 4
+  {
+    id: 22,
+    day: 'wednesday',
+    date: '2025-06-25',
+    shift: 'evening' as const,
+    shiftTime: '18:00 - 22:00',
+    room: 'Phòng C',
+    doctorName: 'BS. Lê Văn Cường',
+    doctorId: 3,
     status: 'assigned' as const
   }
 ];

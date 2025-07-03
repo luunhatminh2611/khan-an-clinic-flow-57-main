@@ -240,7 +240,7 @@ const TechnicianDashboard = () => {
                           className="bg-green-600 hover:bg-green-700"
                           onClick={() => handleUploadResults(test)}
                         >
-                          Tải Kết Quả
+                          Upload Kết Quả
                         </Button>
                       )}
 
