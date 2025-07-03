@@ -39,16 +39,16 @@ const AdminDashboard: React.FC = () => {
   const commonDiseases = [
     { disease: 'Cảm cúm, ĐTHB', count: 45, percentage: 28, trend: 'up' },
     { disease: 'Đau đầu, Stress', count: 32, percentage: 20, trend: 'stable' },
-    { disease: 'Dạ dày, Tiêu hóa', count: 28, percentage: 17, trend: 'up' },
+    { disease: 'Chứng rối loạn tiền đình', count: 28, percentage: 17, trend: 'up' },
     { disease: 'Tim mạch', count: 25, percentage: 15, trend: 'down' },
-    { disease: 'Da liễu', count: 20, percentage: 12, trend: 'up' },
+    { disease: 'Tình trạng chóng mặt ', count: 20, percentage: 12, trend: 'up' },
     { disease: 'Khác', count: 13, percentage: 8, trend: 'stable' }
   ];
 
   // Xét nghiệm phổ biến
   const commonTests = [
     { test: 'Xét nghiệm máu tổng quát', count: 78, cost: '150K', trend: 'up' },
-    { test: 'Siêu âm tổng quát', count: 45, cost: '300K', trend: 'stable' },
+    { test: 'Khám tổng quát', count: 45, cost: '300K', trend: 'stable' },
     { test: 'X-quang ngực', count: 32, cost: '200K', trend: 'up' },
     { test: 'Điện tim', count: 28, cost: '100K', trend: 'down' },
     { test: 'Test nhanh Covid', count: 25, cost: '50K', trend: 'down' }
@@ -133,7 +133,7 @@ const AdminDashboard: React.FC = () => {
     { 
       id: 2,
       name: 'KTV. Lý Thị B', 
-      specialty: 'Siêu âm',
+      specialty: 'Khám tổng quát',
       hoursWorked: 170, 
       daysWorked: 21, 
       testsCompleted: 189,
@@ -553,10 +553,10 @@ const AdminDashboard: React.FC = () => {
             {/* Cảm cúm, ĐTHB - Tăng */}
             <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-3xl p-8 border-l-4 border-blue-500 hover:shadow-lg transition-all duration-300 h-80 flex flex-col">
               <div className="text-center h-12 flex items-center justify-center mb-6">
-                <h3 className="font-bold text-blue-900 text-xl leading-tight">Cảm cúm, ĐTHB</h3>
+                <h3 className="font-bold text-blue-900 text-xl leading-tight">Chứng rối loạn tiền đình</h3>
               </div>
               <div className="text-center flex-1 flex flex-col justify-center">
-                <p className="text-5xl font-bold text-blue-600 mb-4 leading-none">45</p>
+                <div className="text-2xl font-bold text-blue-600 mb-4 leading-none">45</div>
                 <p className="text-lg text-blue-700 font-medium mb-6">ca bệnh</p>
                 <div className="bg-white/60 rounded-lg p-4 border border-white/40 h-16 flex flex-col justify-center">
                   <div className="flex items-center justify-center">
@@ -573,7 +573,7 @@ const AdminDashboard: React.FC = () => {
                 <h3 className="font-bold text-blue-900 text-xl leading-tight">Đau đầu, Stress</h3>
               </div>
               <div className="text-center flex-1 flex flex-col justify-center">
-                <p className="text-5xl font-bold text-blue-600 mb-4 leading-none">32</p>
+                <div className="text-2xl font-bold text-blue-600 mb-4 leading-none">32</div>
                 <p className="text-lg text-blue-700 font-medium mb-6">ca bệnh</p>
                 <div className="bg-white/60 rounded-lg p-4 border border-white/40 h-16 flex flex-col justify-center">
                   <div className="flex items-center justify-center">
@@ -587,10 +587,10 @@ const AdminDashboard: React.FC = () => {
             {/* Dạ dày, Tiêu hóa - Tăng */}
             <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-3xl p-8 border-l-4 border-blue-500 hover:shadow-lg transition-all duration-300 h-80 flex flex-col">
               <div className="text-center h-12 flex items-center justify-center mb-6">
-                <h3 className="font-bold text-blue-900 text-xl leading-tight">Dạ dày, Tiêu hóa</h3>
+                <h3 className="font-bold text-blue-900 text-xl leading-tight">Viêm não màng não</h3>
               </div>
               <div className="text-center flex-1 flex flex-col justify-center">
-                <p className="text-5xl font-bold text-blue-600 mb-4 leading-none">28</p>
+                <div className="text-2xl font-bold text-blue-600 mb-4 leading-none">28</div>
                 <p className="text-lg text-blue-700 font-medium mb-6">ca bệnh</p>
                 <div className="bg-white/60 rounded-lg p-4 border border-white/40 h-16 flex flex-col justify-center">
                   <div className="flex items-center justify-center">
@@ -604,7 +604,7 @@ const AdminDashboard: React.FC = () => {
             {/* Tim mạch - Giảm */}
             <div className="bg-gradient-to-br from-red-50 to-red-100 rounded-3xl p-8 border-l-4 border-red-500 hover:shadow-lg transition-all duration-300 h-80 flex flex-col">
               <div className="text-center h-12 flex items-center justify-center mb-6">
-                <h3 className="font-bold text-red-900 text-xl leading-tight">Tim mạch</h3>
+                <h3 className="font-bold text-red-900 text-xl leading-tight">Thần kinh liên sườn</h3>
               </div>
               <div className="text-center flex-1 flex flex-col justify-center">
                 <p className="text-5xl font-bold text-red-600 mb-4 leading-none">25</p>
@@ -621,7 +621,7 @@ const AdminDashboard: React.FC = () => {
             {/* Da liễu - Tăng */}
             <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-3xl p-8 border-l-4 border-blue-500 hover:shadow-lg transition-all duration-300 h-80 flex flex-col">
               <div className="text-center h-12 flex items-center justify-center mb-6">
-                <h3 className="font-bold text-blue-900 text-xl leading-tight">Da liễu</h3>
+                <h3 className="font-bold text-blue-900 text-xl leading-tight">Thiếu máu não</h3>
               </div>
               <div className="text-center flex-1 flex flex-col justify-center">
                 <p className="text-5xl font-bold text-blue-600 mb-4 leading-none">20</p>
@@ -699,10 +699,10 @@ const AdminDashboard: React.FC = () => {
                 </div>
               </div>
 
-              {/* Siêu âm */}
+              {/* Khám tổng quát */}
               <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-3xl p-8 border-l-4 border-blue-500 hover:shadow-lg transition-all duration-300 h-80 flex flex-col">
                 <div className="text-center h-12 flex items-center justify-center mb-6">
-                  <h3 className="font-bold text-blue-900 text-xl leading-tight">Siêu âm tổng quát</h3>
+                  <h3 className="font-bold text-blue-900 text-xl leading-tight">Khám tổng quát</h3>
                 </div>
                 <div className="text-center flex-1 flex flex-col justify-center">
                   <p className="text-5xl font-bold text-blue-600 mb-4 leading-none">45</p>
@@ -719,7 +719,7 @@ const AdminDashboard: React.FC = () => {
               {/* X-quang */}
               <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-3xl p-8 border-l-4 border-blue-500 hover:shadow-lg transition-all duration-300 h-80 flex flex-col">
                 <div className="text-center h-12 flex items-center justify-center mb-6">
-                  <h3 className="font-bold text-blue-900 text-xl leading-tight">X-quang ngực</h3>
+                  <h3 className="font-bold text-blue-900 text-xl leading-tight">X-quang</h3>
                 </div>
                 <div className="text-center flex-1 flex flex-col justify-center">
                   <p className="text-5xl font-bold text-blue-600 mb-4 leading-none">32</p>
@@ -750,10 +750,10 @@ const AdminDashboard: React.FC = () => {
                 </div>
               </div>
 
-              {/* Test Covid */}
+              {/* Não bộ */}
               <div className="bg-gradient-to-br from-red-50 to-red-100 rounded-3xl p-8 border-l-4 border-red-500 hover:shadow-lg transition-all duration-300 h-80 flex flex-col">
                 <div className="text-center h-12 flex items-center justify-center mb-6">
-                  <h3 className="font-bold text-red-900 text-xl leading-tight">Test Covid</h3>
+                  <h3 className="font-bold text-red-900 text-xl leading-tight">Não bộ</h3>
                 </div>
                 <div className="text-center flex-1 flex flex-col justify-center">
                   <p className="text-5xl font-bold text-red-600 mb-4 leading-none">25</p>
@@ -817,11 +817,11 @@ const AdminDashboard: React.FC = () => {
                         <div className="text-xs text-gray-500">giờ làm</div>
                       </div>
                       <div className="text-center">
-                        <div className="text-2xl font-bold text-green-600">{doctor.daysWorked}</div>
+                        <div className="text-2xl font-bold text-blue-600">{doctor.daysWorked}</div>
                         <div className="text-xs text-gray-500">ngày làm</div>
                       </div>
                       <div className="text-center">
-                        <div className="text-2xl font-bold text-purple-600">{doctor.patientsServed}</div>
+                        <div className="text-2xl font-bold text-blue-600">{doctor.patientsServed}</div>
                         <div className="text-xs text-gray-500">bệnh nhân</div>
                       </div>
                     </div>
@@ -850,7 +850,32 @@ const AdminDashboard: React.FC = () => {
               <h3 className="text-lg font-bold text-gray-900">Phân bố số bệnh nhân</h3>
               <div className="h-80">
                 <ResponsiveContainer width="100%" height="100%">
-                  <RechartsPieChart>
+                  <BarChart
+                    data={doctorAnalysis.map(doctor => ({
+                      ...doctor,
+                      shortName: doctor.name.split(' ').slice(-2).join(' ')
+                    }))}
+                    margin={{
+                      top: 20,
+                      right: 30,
+                      left: 20,
+                      bottom: 30,
+                    }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                    <XAxis 
+                      dataKey="shortName" 
+                      stroke="#6b7280"
+                      fontSize={14}
+                      fontWeight={600}
+                      textAnchor="middle"
+                      height={50}
+                    />
+                    <YAxis 
+                      stroke="#6b7280"
+                      fontSize={14}
+                      fontWeight={500}
+                    />
                     <Tooltip 
                       contentStyle={{
                         backgroundColor: 'rgba(255, 255, 255, 0.95)',
@@ -860,36 +885,22 @@ const AdminDashboard: React.FC = () => {
                         backdropFilter: 'blur(10px)',
                         fontSize: '14px'
                       }}
-                      formatter={(value, name) => [`${value} bệnh nhân`, name]}
+                      formatter={(value, name) => [`${value} bệnh nhân`, 'Số bệnh nhân']}
+                      labelFormatter={(label) => `Bác sĩ: ${label}`}
                     />
-                    <Pie
-                      dataKey="patientsServed"
-                      nameKey="name"
-                      data={doctorAnalysis}
-                      cx="50%"
-                      cy="50%"
-                      outerRadius={120}
-                      innerRadius={60}
-                      fill="#8884d8"
-                      paddingAngle={2}
-                      label={({ name, patientsServed }) => `${name.split(' ').slice(-2).join(' ')}: ${patientsServed}`}
-                      labelLine={false}
-                    >
-                      {doctorAnalysis.map((entry, index) => (
-                        <Cell 
-                          key={`cell-${index}`} 
-                          fill={COLORS[index % COLORS.length]}
-                        />
-                      ))}
-                    </Pie>
-                  </RechartsPieChart>
+                    <Bar 
+                      dataKey="patientsServed" 
+                      fill="#3b82f6"
+                      radius={[4, 4, 0, 0]}
+                    />
+                  </BarChart>
                 </ResponsiveContainer>
               </div>
               
               {/* Top Performers */}
-              <div className="bg-gradient-to-r from-green-50 to-green-100 rounded-xl p-4 border border-green-200">
-                <h4 className="font-bold text-green-900 mb-2">🏆 Xuất sắc nhất tháng</h4>
-                <div className="text-sm text-green-700">
+              <div className="bg-white rounded-xl p-4 border border-gray-200">
+                <h4 className="font-bold text-black mb-2">🏆 Xuất sắc nhất tháng</h4>
+                <div className="text-sm text-black">
                   <div><strong>Nhiều bệnh nhân nhất:</strong> {doctorAnalysis.reduce((max, doctor) => doctor.patientsServed > max.patientsServed ? doctor : max).name} ({doctorAnalysis.reduce((max, doctor) => doctor.patientsServed > max.patientsServed ? doctor : max).patientsServed} BN)</div>
                   <div><strong>Hiệu suất cao nhất:</strong> {doctorAnalysis.reduce((max, doctor) => parseInt(doctor.efficiency) > parseInt(max.efficiency) ? doctor : max).name} ({doctorAnalysis.reduce((max, doctor) => parseInt(doctor.efficiency) > parseInt(max.efficiency) ? doctor : max).efficiency})</div>
                 </div>
@@ -927,11 +938,11 @@ const AdminDashboard: React.FC = () => {
                         <div className="text-xs text-gray-500">giờ làm</div>
                       </div>
                       <div className="text-center">
-                        <div className="text-2xl font-bold text-green-600">{technician.daysWorked}</div>
+                        <div className="text-2xl font-bold text-blue-600">{technician.daysWorked}</div>
                         <div className="text-xs text-gray-500">ngày làm</div>
                       </div>
                       <div className="text-center">
-                        <div className="text-2xl font-bold text-purple-600">{technician.testsCompleted}</div>
+                        <div className="text-2xl font-bold text-blue-600">{technician.testsCompleted}</div>
                         <div className="text-xs text-gray-500">xét nghiệm</div>
                       </div>
                     </div>
@@ -956,50 +967,61 @@ const AdminDashboard: React.FC = () => {
               </div>
             </div>
 
-            <div className="space-y-6">
-              <h3 className="text-lg font-bold text-gray-900">Phân bố số xét nghiệm</h3>
-              <div className="h-80">
-                <ResponsiveContainer width="100%" height="100%">
-                  <RechartsPieChart>
-                    <Tooltip 
-                      contentStyle={{
-                        backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                        border: '1px solid #e5e7eb',
-                        borderRadius: '12px',
-                        boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)',
-                        backdropFilter: 'blur(10px)',
-                        fontSize: '14px'
-                      }}
-                      formatter={(value, name) => [`${value} xét nghiệm`, name]}
-                    />
-                    <Pie
-                      dataKey="testsCompleted"
-                      nameKey="name"
-                      data={technicianAnalysis}
-                      cx="50%"
-                      cy="50%"
-                      outerRadius={120}
-                      innerRadius={60}
-                      fill="#8884d8"
-                      paddingAngle={2}
-                      label={({ name, testsCompleted }) => `${name.split(' ').slice(-2).join(' ')}: ${testsCompleted}`}
-                      labelLine={false}
-                    >
-                      {technicianAnalysis.map((entry, index) => (
-                        <Cell 
-                          key={`cell-${index}`} 
-                          fill={COLORS[index % COLORS.length]}
-                        />
-                      ))}
-                    </Pie>
-                  </RechartsPieChart>
-                </ResponsiveContainer>
-              </div>
+                         <div className="space-y-6">
+               <h3 className="text-lg font-bold text-gray-900">Phân bố số xét nghiệm</h3>
+               <div className="h-80">
+                 <ResponsiveContainer width="100%" height="100%">
+                   <BarChart
+                     data={technicianAnalysis.map(tech => ({
+                       ...tech,
+                       shortName: tech.name.split(' ').slice(-2).join(' ')
+                     }))}
+                     margin={{
+                       top: 20,
+                       right: 30,
+                       left: 20,
+                       bottom: 30,
+                     }}
+                   >
+                     <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                     <XAxis 
+                       dataKey="shortName" 
+                       stroke="#6b7280"
+                       fontSize={14}
+                       fontWeight={600}
+                       textAnchor="middle"
+                       height={50}
+                     />
+                     <YAxis 
+                       stroke="#6b7280"
+                       fontSize={14}
+                       fontWeight={500}
+                     />
+                     <Tooltip 
+                       contentStyle={{
+                         backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                         border: '1px solid #e5e7eb',
+                         borderRadius: '12px',
+                         boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)',
+                         backdropFilter: 'blur(10px)',
+                         fontSize: '14px'
+                       }}
+                       formatter={(value, name) => [`${value} xét nghiệm`, 'Số xét nghiệm']}
+                       labelFormatter={(label) => `KTV: ${label}`}
+                     />
+                     <Bar 
+                       dataKey="testsCompleted" 
+                       fill="#3b82f6"
+                       radius={[4, 4, 0, 0]}
+                     />
+                   </BarChart>
+                 </ResponsiveContainer>
+               </div>
               
               {/* Top Performers */}
-              <div className="bg-gradient-to-r from-purple-50 to-purple-100 rounded-xl p-4 border border-purple-200">
-                <h4 className="font-bold text-purple-900 mb-2">🏆 Xuất sắc nhất tháng</h4>
-                <div className="text-sm text-purple-700">
+              <div className="bg-white rounded-xl p-4 border border-gray-200">
+                <h4 className="font-bold text-black mb-2">🏆 Xuất sắc nhất tháng</h4>
+                <div className="text-sm text-black">
                   <div><strong>Nhiều xét nghiệm nhất:</strong> {technicianAnalysis.reduce((max, tech) => tech.testsCompleted > max.testsCompleted ? tech : max).name} ({technicianAnalysis.reduce((max, tech) => tech.testsCompleted > max.testsCompleted ? tech : max).testsCompleted} XN)</div>
                   <div><strong>Hiệu suất cao nhất:</strong> {technicianAnalysis.reduce((max, tech) => parseInt(tech.efficiency) > parseInt(max.efficiency) ? tech : max).name} ({technicianAnalysis.reduce((max, tech) => parseInt(tech.efficiency) > parseInt(max.efficiency) ? tech : max).efficiency})</div>
                 </div>
@@ -1033,19 +1055,19 @@ const AdminDashboard: React.FC = () => {
                     
                     <div className="grid grid-cols-4 gap-3 mb-4">
                       <div className="text-center">
-                        <div className="text-xl font-bold text-blue-600">{receptionist.hoursWorked}</div>
+                        <div className="text-2xl font-bold text-blue-600">{receptionist.hoursWorked}</div>
                         <div className="text-xs text-gray-500">giờ làm</div>
                       </div>
                       <div className="text-center">
-                        <div className="text-xl font-bold text-green-600">{receptionist.daysWorked}</div>
+                        <div className="text-2xl font-bold text-blue-600">{receptionist.daysWorked}</div>
                         <div className="text-xs text-gray-500">ngày làm</div>
                       </div>
                       <div className="text-center">
-                        <div className="text-xl font-bold text-purple-600">{receptionist.appointmentsHandled}</div>
+                        <div className="text-2xl font-bold text-blue-600">{receptionist.appointmentsHandled}</div>
                         <div className="text-xs text-gray-500">lịch hẹn</div>
                       </div>
                       <div className="text-center">
-                        <div className="text-xl font-bold text-orange-600">{receptionist.callsAnswered}</div>
+                        <div className="text-2xl font-bold text-blue-600">{receptionist.callsAnswered}</div>
                         <div className="text-xs text-gray-500">cuộc gọi</div>
                       </div>
                     </div>
@@ -1064,56 +1086,67 @@ const AdminDashboard: React.FC = () => {
                         }`}
                         style={{ width: `${parseInt(receptionist.efficiency)}%` }}
                       ></div>
-                    </div>
-                  </div>
-                ))}
+            </div>
+          </div>
+        ))}
               </div>
             </div>
 
-            <div className="space-y-6">
-              <h3 className="text-lg font-bold text-gray-900">Phân bố lịch hẹn xử lý</h3>
-              <div className="h-80">
-                <ResponsiveContainer width="100%" height="100%">
-                  <RechartsPieChart>
-                    <Tooltip 
-                      contentStyle={{
-                        backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                        border: '1px solid #e5e7eb',
-                        borderRadius: '12px',
-                        boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)',
-                        backdropFilter: 'blur(10px)',
-                        fontSize: '14px'
-                      }}
-                      formatter={(value, name) => [`${value} lịch hẹn`, name]}
-                    />
-                    <Pie
-                      dataKey="appointmentsHandled"
-                      nameKey="name"
-                      data={receptionistAnalysis}
-                      cx="50%"
-                      cy="50%"
-                      outerRadius={120}
-                      innerRadius={60}
-                      fill="#8884d8"
-                      paddingAngle={2}
-                      label={({ name, appointmentsHandled }) => `${name.split(' ').slice(-2).join(' ')}: ${appointmentsHandled}`}
-                      labelLine={false}
-                    >
-                      {receptionistAnalysis.map((entry, index) => (
-                        <Cell 
-                          key={`cell-${index}`} 
-                          fill={COLORS[index % COLORS.length]}
-                        />
-                      ))}
-                    </Pie>
-                  </RechartsPieChart>
-                </ResponsiveContainer>
-              </div>
-              
+                         <div className="space-y-6">
+               <h3 className="text-lg font-bold text-gray-900">Phân bố lịch hẹn xử lý</h3>
+               <div className="h-80">
+                 <ResponsiveContainer width="100%" height="100%">
+                   <BarChart
+                     data={receptionistAnalysis.map(rec => ({
+                       ...rec,
+                       shortName: rec.name.split(' ').slice(-2).join(' ')
+                     }))}
+                     margin={{
+                       top: 20,
+                       right: 30,
+                       left: 20,
+                       bottom: 30,
+                     }}
+                   >
+                     <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                     <XAxis 
+                       dataKey="shortName" 
+                       stroke="#6b7280"
+                       fontSize={14}
+                       fontWeight={600}
+                       textAnchor="middle"
+                       height={50}
+                     />
+                     <YAxis 
+                       stroke="#6b7280"
+                       fontSize={14}
+                       fontWeight={500}
+                     />
+                     <Tooltip 
+                       contentStyle={{
+                         backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                         border: '1px solid #e5e7eb',
+                         borderRadius: '12px',
+                         boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)',
+                         backdropFilter: 'blur(10px)',
+                         fontSize: '14px'
+                       }}
+                       formatter={(value, name) => [`${value} lịch hẹn`, 'Số lịch hẹn']}
+                       labelFormatter={(label) => `Lễ tân: ${label}`}
+                     />
+                     <Bar 
+                       dataKey="appointmentsHandled" 
+                       fill="#3b82f6"
+                       radius={[4, 4, 0, 0]}
+                     />
+                   </BarChart>
+                 </ResponsiveContainer>
+      </div>
+
               {/* Top Performers */}
-              <div className="bg-gradient-to-r from-orange-50 to-orange-100 rounded-xl p-4 border border-orange-200">
-                <h4 className="font-bold text-orange-900 mb-2">🏆 Xuất sắc nhất tháng</h4>
-                <div className="text-sm text-orange-700">
+              <div className="bg-white rounded-xl p-4 border border-gray-200">
+                <h4 className="font-bold text-black mb-2">🏆 Xuất sắc nhất tháng</h4>
+                <div className="text-sm text-black">
                   <div><strong>Nhiều lịch hẹn nhất:</strong> {receptionistAnalysis.reduce((max, rec) => rec.appointmentsHandled > max.appointmentsHandled ? rec : max).name} ({receptionistAnalysis.reduce((max, rec) => rec.appointmentsHandled > max.appointmentsHandled ? rec : max).appointmentsHandled} LH)</div>
                   <div><strong>Nhiều cuộc gọi nhất:</strong> {receptionistAnalysis.reduce((max, rec) => rec.callsAnswered > max.callsAnswered ? rec : max).name} ({receptionistAnalysis.reduce((max, rec) => rec.callsAnswered > max.callsAnswered ? rec : max).callsAnswered} CG)</div>
                   <div><strong>Hiệu suất cao nhất:</strong> {receptionistAnalysis.reduce((max, rec) => parseInt(rec.efficiency) > parseInt(max.efficiency) ? rec : max).name} ({receptionistAnalysis.reduce((max, rec) => parseInt(rec.efficiency) > parseInt(max.efficiency) ? rec : max).efficiency})</div>

@@ -717,7 +717,7 @@ const MaterialManagementPage = () => {
         if (!materialSearchFilter) return true;
         
         const searchTerm = materialSearchFilter.toLowerCase();
-        return (
+    return (
             material.name.toLowerCase().includes(searchTerm) ||
             material.category.toLowerCase().includes(searchTerm) ||
             material.description.toLowerCase().includes(searchTerm) ||
@@ -989,7 +989,7 @@ const MaterialManagementPage = () => {
                 </form>
             </Card>
 
-                            {/* Danh sách vật tư */}
+            {/* Danh sách vật tư */}
                 <div className="space-y-6">
                     <div className="flex justify-between items-center">
                         <h2 className="text-2xl font-semibold text-gray-900">Danh sách vật tư</h2>
