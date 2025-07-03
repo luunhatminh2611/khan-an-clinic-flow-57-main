@@ -1,138 +1,297 @@
-
-import { useState } from 'react';
+import React, { useState } from 'react';
+import { Calendar, Clock, User, Building, RefreshCw, Check, X } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Plus } from 'lucide-react';
+import ScheduleSwapModal from './ScheduleSwapModal';
 
-const WeeklyScheduleGrid = ({ schedules, onCreateSchedule, onEditSchedule }) => {
-  const [hoveredSchedule, setHoveredSchedule] = useState(null);
-  const [hoverPosition, setHoverPosition] = useState({ x: 0, y: 0 });
+interface ScheduleItem {
+  id: number;
+  day: string;
+  date: string;
+  shift: 'morning' | 'afternoon';
+  shiftTime: string;
+  room: string;
+  doctorName: string;
+  doctorId: number;
+  status: 'assigned' | 'free';
+}
 
-  const timeSlots = Array.from({ length: 24 }, (_, i) => {
-    const hour = i.toString().padStart(2, '0');
-    return `${hour}:00`;
-  });
+interface WeeklyScheduleGridProps {
+  schedules: ScheduleItem[];
+  currentDoctorId: number;
+  currentDoctorName: string;
+  onScheduleSwap: (fromSchedule: ScheduleItem, toSchedule: ScheduleItem) => void;
+  swapRequests: any[];
+  onSwapRequestResponse: (requestId: number, accepted: boolean) => void;
+}
+
+const WeeklyScheduleGrid: React.FC<WeeklyScheduleGridProps> = ({
+  schedules,
+  currentDoctorId,
+  currentDoctorName,
+  onScheduleSwap,
+  swapRequests,
+  onSwapRequestResponse
+}) => {
+  const [selectedFromSchedule, setSelectedFromSchedule] = useState<ScheduleItem | null>(null);
+  const [selectedToSchedule, setSelectedToSchedule] = useState<ScheduleItem | null>(null);
+  const [showSwapModal, setShowSwapModal] = useState(false);
 
   const weekDays = [
-    { key: 'monday', label: 'Thứ 2 09/06' },
-    { key: 'tuesday', label: 'Thứ 3 10/06' },
-    { key: 'wednesday', label: 'Thứ 4 11/06' },
-    { key: 'thursday', label: 'Thứ 5 12/06' },
-    { key: 'friday', label: 'Thứ 6 13/06' },
-    { key: 'saturday', label: 'Thứ 7 14/06' },
-    { key: 'sunday', label: 'CN 15/06' },
+    { id: 'monday', name: 'Thứ 2', date: '2025-06-23' },
+    { id: 'tuesday', name: 'Thứ 3', date: '2025-06-24' },
+    { id: 'wednesday', name: 'Thứ 4', date: '2025-06-25' },
+    { id: 'thursday', name: 'Thứ 5', date: '2025-06-26' },
+    { id: 'friday', name: 'Thứ 6', date: '2025-06-27' },
+    { id: 'saturday', name: 'Thứ 7', date: '2025-06-28' },
+    { id: 'sunday', name: 'Chủ nhật', date: '2025-06-29' }
   ];
 
-  const getScheduleForSlot = (day, time) => {
-    return schedules.find(s => 
-      s.dayOfWeek === day && 
-      s.timeSlots.some(slot => {
-        const [start, end] = slot.time.split('-');
-        return time >= start && time < end;
-      })
-    );
+  const shifts = [
+    { id: 'morning', name: 'Ca sáng', time: '8:00 - 12:00' },
+    { id: 'afternoon', name: 'Ca chiều', time: '13:30 - 17:30' }
+  ];
+
+  const getScheduleForDayShift = (day: string, shift: string) => {
+    return schedules.find(s => s.day === day && s.shift === shift);
   };
 
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'có mặt': return 'bg-green-100 text-green-800';
-      case 'nghỉ': return 'bg-red-100 text-red-800';
-      case 'bận': return 'bg-yellow-100 text-yellow-800';
-      default: return 'bg-gray-100 text-gray-800';
+  const handleScheduleClick = (schedule: ScheduleItem) => {
+    if (schedule.doctorId === currentDoctorId && schedule.status === 'assigned') {
+      // Chọn lịch hiện tại của mình
+      setSelectedFromSchedule(schedule);
+      setSelectedToSchedule(null);
+    } else if (selectedFromSchedule && schedule.status === 'assigned' && schedule.doctorId !== currentDoctorId) {
+      // Chọn lịch muốn đổi
+      setSelectedToSchedule(schedule);
     }
   };
 
-  const handleMouseEnter = (schedule, event) => {
-    setHoveredSchedule(schedule);
-    setHoverPosition({ x: event.clientX, y: event.clientY });
+  const handleSwapClick = () => {
+    if (selectedFromSchedule && selectedToSchedule) {
+      setShowSwapModal(true);
+    }
   };
 
-  const handleMouseLeave = () => {
-    setHoveredSchedule(null);
+  const handleConfirmSwap = () => {
+    if (selectedFromSchedule && selectedToSchedule) {
+      onScheduleSwap(selectedFromSchedule, selectedToSchedule);
+      setSelectedFromSchedule(null);
+      setSelectedToSchedule(null);
+      setShowSwapModal(false);
+    }
   };
+
+  const resetSelection = () => {
+    setSelectedFromSchedule(null);
+    setSelectedToSchedule(null);
+  };
+
+  // Lọc các yêu cầu đổi lịch cho bác sĩ hiện tại
+  const pendingSwapRequests = swapRequests.filter(
+    req => req.targetDoctorId === currentDoctorId && req.status === 'pending'
+  );
 
   return (
-    <div className="relative">
-      <div className="flex justify-between items-center mb-4">
-        <div className="flex gap-2">
-          <Badge className="bg-green-100 text-green-800">Có mặt</Badge>
-          <Badge className="bg-yellow-100 text-yellow-800">Nghỉ</Badge>
-          <Badge className="bg-red-100 text-red-800">Bận</Badge>
-        </div>
-        <div className="flex gap-2">
-          <Button variant="outline">Xem theo tuần</Button>
-          <Button 
-            className="bg-blue-600 hover:bg-blue-700"
-            onClick={onCreateSchedule}
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Thêm lịch
-          </Button>
-        </div>
-      </div>
-
-      <Card className="overflow-hidden">
-        <div className="grid grid-cols-8 border-b">
-          <div className="p-2 bg-gray-50 border-r text-sm font-medium"></div>
-          {weekDays.map(day => (
-            <div key={day.key} className="p-2 bg-blue-500 text-white text-center text-sm font-medium border-r">
-              {day.label}
-            </div>
-          ))}
-        </div>
-
-        <div className="max-h-96 overflow-y-auto">
-          {timeSlots.map(time => (
-            <div key={time} className="grid grid-cols-8 border-b hover:bg-gray-50">
-              <div className="p-2 bg-gray-50 border-r text-xs text-gray-600 font-medium">
-                {time}
-              </div>
-              {weekDays.map(day => {
-                const schedule = getScheduleForSlot(day.key, time);
-                return (
-                  <div 
-                    key={day.key} 
-                    className="border-r h-12 relative cursor-pointer"
-                    onMouseEnter={(e) => schedule && handleMouseEnter(schedule, e)}
-                    onMouseLeave={handleMouseLeave}
-                  >
-                    {schedule && (
-                      <div 
-                        className={`absolute inset-1 rounded text-xs p-1 ${getStatusColor(schedule.status)}`}
-                        onClick={() => onEditSchedule(schedule)}
-                      >
-                        {schedule.room}
-                      </div>
-                    )}
+    <div className="space-y-6">
+      {/* Thông báo yêu cầu đổi lịch */}
+      {pendingSwapRequests.length > 0 && (
+        <Card className="p-4 border-l-4 border-yellow-500 bg-yellow-50">
+          <h3 className="text-lg font-semibold text-yellow-800 mb-3">
+            Yêu cầu đổi lịch ({pendingSwapRequests.length})
+          </h3>
+          <div className="space-y-3">
+            {pendingSwapRequests.map((request) => (
+              <div key={request.id} className="bg-white p-3 rounded-lg border">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium">
+                      {request.requesterName} muốn đổi lịch
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      {request.fromSchedule.day} - {request.fromSchedule.shift === 'morning' ? 'Ca sáng' : 'Ca chiều'} 
+                      - {request.fromSchedule.room}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      ↔ {request.toSchedule.day} - {request.toSchedule.shift === 'morning' ? 'Ca sáng' : 'Ca chiều'} 
+                      - {request.toSchedule.room}
+                    </p>
                   </div>
-                );
-              })}
-            </div>
-          ))}
-        </div>
-      </Card>
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="text-green-600 border-green-600"
+                      onClick={() => onSwapRequestResponse(request.id, true)}
+                    >
+                      <Check className="w-4 h-4 mr-1" />
+                      Chấp nhận
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="text-red-600 border-red-600"
+                      onClick={() => onSwapRequestResponse(request.id, false)}
+                    >
+                      <X className="w-4 h-4 mr-1" />
+                      Từ chối
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </Card>
+      )}
 
-      {/* Hover tooltip */}
-      {hoveredSchedule && (
-        <div 
-          className="fixed z-50 bg-white border rounded-lg shadow-lg p-3 max-w-xs"
-          style={{ 
-            left: hoverPosition.x + 10, 
-            top: hoverPosition.y - 10,
-            pointerEvents: 'none'
-          }}
-        >
-          <div className="space-y-1 text-sm">
-            <div><strong>Phòng:</strong> {hoveredSchedule.room}</div>
-            <div><strong>Trạng thái:</strong> 
-              <Badge className={`ml-2 ${getStatusColor(hoveredSchedule.status)}`}>
-                {hoveredSchedule.status}
-              </Badge>
+      <Card className="p-6">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-xl font-semibold">Lịch làm việc tuần</h2>
+          
+          {selectedFromSchedule && selectedToSchedule && (
+            <div className="flex items-center gap-4">
+              <Button
+                variant="outline"
+                onClick={resetSelection}
+              >
+                Hủy chọn
+              </Button>
+              <Button
+                onClick={handleSwapClick}
+                className="bg-blue-600 hover:bg-blue-700"
+              >
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Đổi lịch
+              </Button>
             </div>
-            <div><strong>Giờ:</strong> {hoveredSchedule.timeSlots[0]?.time}</div>
+          )}
+        </div>
+
+        {/* Hướng dẫn */}
+        <div className="mb-4 p-3 bg-blue-50 rounded-lg">
+          <p className="text-sm text-blue-800">
+            <strong>Hướng dẫn:</strong> Chọn lịch hiện tại của bạn (màu xanh), sau đó chọn lịch muốn đổi (màu khác) để tạo yêu cầu đổi lịch.
+          </p>
+        </div>
+
+        {/* Lưới lịch làm việc */}
+        <div className="overflow-x-auto">
+          <div className="grid grid-cols-8 gap-2 min-w-full">
+            {/* Header */}
+            <div className="p-3 font-semibold text-center bg-gray-100 rounded">
+              Ca / Ngày
+            </div>
+            {weekDays.map(day => (
+              <div key={day.id} className="p-3 font-semibold text-center bg-gray-100 rounded">
+                <div>{day.name}</div>
+                <div className="text-xs text-gray-500">{day.date}</div>
+              </div>
+            ))}
+
+            {/* Lịch theo ca */}
+            {shifts.map(shift => (
+              <React.Fragment key={shift.id}>
+                <div className="p-3 font-medium bg-gray-50 rounded flex items-center">
+                  <Clock className="w-4 h-4 mr-2 text-gray-600" />
+                  <div>
+                    <div className="font-semibold">{shift.name}</div>
+                    <div className="text-xs text-gray-500">{shift.time}</div>
+                  </div>
+                </div>
+                
+                {weekDays.map(day => {
+                  const schedule = getScheduleForDayShift(day.id, shift.id);
+                  const isSelected = selectedFromSchedule?.id === schedule?.id || selectedToSchedule?.id === schedule?.id;
+                  const isMySchedule = schedule?.doctorId === currentDoctorId;
+                  const canSelect = schedule?.status === 'assigned' && 
+                    ((isMySchedule && !selectedFromSchedule) || 
+                     (!isMySchedule && selectedFromSchedule && !selectedToSchedule));
+
+                  return (
+                    <div key={`${day.id}-${shift.id}`} className="p-2">
+                      {schedule && schedule.status === 'assigned' ? (
+                        <div
+                          className={`p-3 rounded-lg border-2 cursor-pointer transition-all ${
+                            isSelected 
+                              ? 'border-blue-500 bg-blue-100 shadow-md'
+                              : isMySchedule
+                                ? 'border-green-500 bg-green-50 hover:bg-green-100'
+                                : canSelect
+                                  ? 'border-gray-300 bg-gray-50 hover:bg-gray-100'
+                                  : 'border-gray-200 bg-gray-50'
+                          } ${canSelect ? 'hover:shadow-md' : ''}`}
+                          onClick={() => canSelect ? handleScheduleClick(schedule) : undefined}
+                        >
+                          <div className="space-y-1">
+                            <div className="flex items-center text-xs">
+                              <User className="w-3 h-3 mr-1" />
+                              <span className={isMySchedule ? 'font-bold text-green-700' : 'text-gray-700'}>
+                                {schedule.doctorName}
+                              </span>
+                            </div>
+                            <div className="flex items-center text-xs text-gray-600">
+                              <Building className="w-3 h-3 mr-1" />
+                              <span>{schedule.room}</span>
+                            </div>
+                            {isMySchedule && (
+                              <Badge className="text-xs bg-green-100 text-green-800">
+                                Lịch của tôi
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="p-3 rounded-lg border-2 border-dashed border-gray-200 bg-gray-50">
+                          <div className="text-center text-gray-400 text-xs">
+                            Trống
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </React.Fragment>
+            ))}
           </div>
         </div>
+
+        {/* Thông tin lựa chọn */}
+        {(selectedFromSchedule || selectedToSchedule) && (
+          <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+            <h3 className="font-semibold mb-3">Thông tin đổi lịch:</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {selectedFromSchedule && (
+                <div className="p-3 bg-green-100 rounded border-l-4 border-green-500">
+                  <h4 className="font-medium text-green-800">Lịch hiện tại của tôi:</h4>
+                  <p className="text-sm text-green-700">
+                    {selectedFromSchedule.day} - {selectedFromSchedule.shift === 'morning' ? 'Ca sáng' : 'Ca chiều'} - {selectedFromSchedule.room}
+                  </p>
+                </div>
+              )}
+              {selectedToSchedule && (
+                <div className="p-3 bg-blue-100 rounded border-l-4 border-blue-500">
+                  <h4 className="font-medium text-blue-800">Lịch muốn đổi:</h4>
+                  <p className="text-sm text-blue-700">
+                    {selectedToSchedule.day} - {selectedToSchedule.shift === 'morning' ? 'Ca sáng' : 'Ca chiều'} - {selectedToSchedule.room}
+                  </p>
+                  <p className="text-sm text-blue-700">BS: {selectedToSchedule.doctorName}</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </Card>
+
+      {/* Modal xác nhận đổi lịch */}
+      {showSwapModal && selectedFromSchedule && selectedToSchedule && (
+        <ScheduleSwapModal
+          fromSchedule={selectedFromSchedule}
+          toSchedule={selectedToSchedule}
+          currentDoctorName={currentDoctorName}
+          onConfirm={handleConfirmSwap}
+          onCancel={() => setShowSwapModal(false)}
+        />
       )}
     </div>
   );
