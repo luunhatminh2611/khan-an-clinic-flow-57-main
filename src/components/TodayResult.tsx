@@ -94,7 +94,7 @@ const AutocompleteDrugInput = ({ value, onChange, medicines }) => {
   );
 };
 
-const TodayVisitResult = ({ patient, onBack, onComplete }) => {
+const TodayVisitResult = ({ patient, onBack, onComplete, onCompleteSchedule }) => {
   const [conclusion, setConclusion] = useState('');
   const [recommendation, setRecommendation] = useState('');
   const [prescriptions, setPrescriptions] = useState([]);
@@ -258,7 +258,7 @@ const TodayVisitResult = ({ patient, onBack, onComplete }) => {
 
       {/* Hoàn thành khám */}
       {isCompleted && (
-        <div className="text-center">
+        <div className="text-center space-x-2">
           <Button
             className="bg-green-600 hover:bg-green-700 text-white mt-4"
             onClick={() => {
@@ -274,6 +274,16 @@ const TodayVisitResult = ({ patient, onBack, onComplete }) => {
             }}
           >
             Hoàn Thành Khám
+          </Button>
+          <Button
+            className=" text-white mt-4"
+            onClick={() => {
+              
+              onCompleteSchedule?.();
+              onBack?.();
+            }}
+          >
+            Đặt lịch tái khám
           </Button>
         </div>
       )}
