@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
-import { Calendar, Clock, Users, User, Plus, Edit, Save, X, Building } from 'lucide-react';
+import { Calendar, Clock, Users, User, Plus, Edit, Save, X, Building, AlertTriangle } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { toast } from '@/hooks/use-toast';
 
 const ScheduleManagement: React.FC = () => {
   const [selectedWeek, setSelectedWeek] = useState(new Date().toISOString().split('T')[0]);
   const [activeTab, setActiveTab] = useState<'doctors' | 'technicians'>('doctors');
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
-  const [selectedShift, setSelectedShift] = useState<'morning' | 'afternoon' | null>(null);
+  const [selectedShift, setSelectedShift] = useState<'morning' | 'afternoon' | 'evening' | null>(null);
 
   // Mock data for doctors
   const doctors = [
@@ -29,7 +30,8 @@ const ScheduleManagement: React.FC = () => {
   const technicianRooms = ['Phòng A', 'Phòng B', 'Phòng C', 'Phòng D', 'Phòng E', 'Phòng F', 'Phòng G'];
   const shifts = [
     { id: 'morning', name: 'Ca sáng', time: '8:00 - 12:00' },
-    { id: 'afternoon', name: 'Ca chiều', time: '13:30 - 17:30' }
+    { id: 'afternoon', name: 'Ca chiều', time: '13:30 - 17:30' },
+    { id: 'evening', name: 'Ca tối', time: '18:00 - 22:00' }
   ];
 
   const weekDays = [
@@ -42,7 +44,7 @@ const ScheduleManagement: React.FC = () => {
     { id: 'sunday', name: 'Chủ nhật', date: '2025-06-29' }
   ];
 
-  // Mock schedule data
+  // Mock schedule data - cập nhật để bao gồm ca tối
   const [schedules, setSchedules] = useState({
     doctors: {
       monday: {
@@ -53,6 +55,9 @@ const ScheduleManagement: React.FC = () => {
         afternoon: [
           { staffId: 3, room: 'Phòng 1' },
           { staffId: 4, room: 'Phòng 3' }
+        ],
+        evening: [
+          { staffId: 1, room: 'Phòng 4' }
         ]
       },
       tuesday: {
@@ -62,7 +67,8 @@ const ScheduleManagement: React.FC = () => {
         ],
         afternoon: [
           { staffId: 2, room: 'Phòng 1' }
-        ]
+        ],
+        evening: []
       }
     },
     technicians: {
@@ -74,6 +80,9 @@ const ScheduleManagement: React.FC = () => {
         afternoon: [
           { staffId: 3, room: 'Phòng C' },
           { staffId: 4, room: 'Phòng D' }
+        ],
+        evening: [
+          { staffId: 5, room: 'Phòng E' }
         ]
       }
     }
@@ -91,7 +100,24 @@ const ScheduleManagement: React.FC = () => {
     return staff ? staff.name : 'Chưa phân công';
   };
 
+  const checkScheduleConflict = (day: string, shift: string, room: string) => {
+    const daySchedule = schedules[activeTab]?.[day];
+    if (!daySchedule) return false;
+
+    const shiftSchedule = daySchedule[shift] || [];
+    return shiftSchedule.some(assignment => assignment.room === room);
+  };
+
   const addSchedule = (day: string, shift: string, staffId: number, room: string) => {
+    if (checkScheduleConflict(day, shift, room)) {
+      toast({
+        title: "Xung đột lịch làm việc",
+        description: `${room} đã có người làm việc trong ${shifts.find(s => s.id === shift)?.name} này`,
+        variant: "destructive"
+      });
+      return false;
+    }
+
     setSchedules(prev => ({
       ...prev,
       [activeTab]: {
@@ -105,6 +131,13 @@ const ScheduleManagement: React.FC = () => {
         }
       }
     }));
+
+    toast({
+      title: "Đã thêm lịch làm việc",
+      description: `${getStaffName(staffId)} - ${room} - ${shifts.find(s => s.id === shift)?.name}`,
+    });
+
+    return true;
   };
 
   const removeSchedule = (day: string, shift: string, index: number) => {
@@ -118,6 +151,11 @@ const ScheduleManagement: React.FC = () => {
         }
       }
     }));
+
+    toast({
+      title: "Đã xóa lịch làm việc",
+      description: "Lịch làm việc đã được xóa thành công",
+    });
   };
 
   return (
@@ -131,7 +169,7 @@ const ScheduleManagement: React.FC = () => {
             Sắp xếp lịch làm việc cho bác sĩ và kỹ thuật viên
           </p>
         </div>
-        
+
         <div className="flex items-center space-x-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -152,22 +190,20 @@ const ScheduleManagement: React.FC = () => {
         <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg">
           <button
             onClick={() => setActiveTab('doctors')}
-            className={`flex-1 flex items-center justify-center space-x-2 py-2 px-4 rounded-md font-medium transition-colors ${
-              activeTab === 'doctors'
-                ? 'bg-white text-clinic-navy shadow-sm'
-                : 'text-gray-600 hover:text-clinic-navy'
-            }`}
+            className={`flex-1 flex items-center justify-center space-x-2 py-2 px-4 rounded-md font-medium transition-colors ${activeTab === 'doctors'
+              ? 'bg-white text-clinic-navy shadow-sm'
+              : 'text-gray-600 hover:text-clinic-navy'
+              }`}
           >
             <User size={20} />
             <span>Bác sĩ ({doctorRooms.length} phòng)</span>
           </button>
           <button
             onClick={() => setActiveTab('technicians')}
-            className={`flex-1 flex items-center justify-center space-x-2 py-2 px-4 rounded-md font-medium transition-colors ${
-              activeTab === 'technicians'
-                ? 'bg-white text-clinic-navy shadow-sm'
-                : 'text-gray-600 hover:text-clinic-navy'
-            }`}
+            className={`flex-1 flex items-center justify-center space-x-2 py-2 px-4 rounded-md font-medium transition-colors ${activeTab === 'technicians'
+              ? 'bg-white text-clinic-navy shadow-sm'
+              : 'text-gray-600 hover:text-clinic-navy'
+              }`}
           >
             <Users size={20} />
             <span>Kỹ thuật viên ({technicianRooms.length} phòng)</span>
@@ -180,7 +216,7 @@ const ScheduleManagement: React.FC = () => {
         <h2 className="text-xl font-poppins font-semibold text-clinic-navy mb-4">
           Lịch tuần - {activeTab === 'doctors' ? 'Bác sĩ' : 'Kỹ thuật viên'}
         </h2>
-        
+
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>
@@ -233,11 +269,11 @@ const ScheduleManagement: React.FC = () => {
                             </button>
                           </div>
                         ))}
-                        
+
                         <button
                           onClick={() => {
                             setSelectedDay(day.id);
-                            setSelectedShift(shift.id as 'morning' | 'afternoon');
+                            setSelectedShift(shift.id as 'morning' | 'afternoon' | 'evening');
                           }}
                           className="w-full flex items-center justify-center space-x-1 p-2 border-2 border-dashed border-gray-300 rounded-lg text-gray-500 hover:border-clinic-blue hover:text-clinic-blue transition-colors"
                         >
@@ -264,7 +300,17 @@ const ScheduleManagement: React.FC = () => {
             <p className="text-gray-600 mb-4">
               {weekDays.find(d => d.id === selectedDay)?.name} - {shifts.find(s => s.id === selectedShift)?.name}
             </p>
-            
+
+            <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+              <div className="flex items-center space-x-2 text-yellow-800">
+                <AlertTriangle size={16} />
+                <span className="text-sm font-medium">Lưu ý:</span>
+              </div>
+              <p className="text-sm text-yellow-700 mt-1">
+                Mỗi phòng chỉ có thể có một {activeTab === 'doctors' ? 'bác sĩ' : 'kỹ thuật viên'} trong một ca làm việc.
+              </p>
+            </div>
+
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -282,7 +328,7 @@ const ScheduleManagement: React.FC = () => {
                   ))}
                 </select>
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Chọn phòng
@@ -292,15 +338,23 @@ const ScheduleManagement: React.FC = () => {
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-clinic-blue"
                 >
                   <option value="">-- Chọn phòng --</option>
-                  {getCurrentRooms().map(room => (
-                    <option key={room} value={room}>
-                      {room}
-                    </option>
-                  ))}
+                  {getCurrentRooms().map(room => {
+                    const isOccupied = checkScheduleConflict(selectedDay, selectedShift, room);
+                    return (
+                      <option
+                        key={room}
+                        value={room}
+                        disabled={isOccupied}
+                        className={isOccupied ? 'text-gray-400' : ''}
+                      >
+                        {room} {isOccupied ? '(Đã có người)' : ''}
+                      </option>
+                    );
+                  })}
                 </select>
               </div>
             </div>
-            
+
             <div className="flex justify-end space-x-3 mt-6">
               <button
                 onClick={() => {
@@ -315,11 +369,13 @@ const ScheduleManagement: React.FC = () => {
                 onClick={() => {
                   const staffSelect = document.getElementById('staff-select') as HTMLSelectElement;
                   const roomSelect = document.getElementById('room-select') as HTMLSelectElement;
-                  
+
                   if (staffSelect.value && roomSelect.value) {
-                    addSchedule(selectedDay, selectedShift, parseInt(staffSelect.value), roomSelect.value);
-                    setSelectedDay(null);
-                    setSelectedShift(null);
+                    const success = addSchedule(selectedDay, selectedShift, parseInt(staffSelect.value), roomSelect.value);
+                    if (success) {
+                      setSelectedDay(null);
+                      setSelectedShift(null);
+                    }
                   }
                 }}
                 className="flex items-center space-x-2 clinic-button-primary"
@@ -342,14 +398,14 @@ const ScheduleManagement: React.FC = () => {
             Tổng {activeTab === 'doctors' ? 'bác sĩ' : 'kỹ thuật viên'}
           </p>
         </div>
-        
+
         <div className="clinic-card text-center">
           <h3 className="text-2xl font-bold text-clinic-navy">
             {getCurrentRooms().length}
           </h3>
           <p className="text-gray-600">Tổng phòng</p>
         </div>
-        
+
         <div className="clinic-card text-center">
           <h3 className="text-2xl font-bold text-clinic-navy">
             {Object.values(schedules[activeTab] || {}).reduce((total, day) => {
@@ -358,9 +414,9 @@ const ScheduleManagement: React.FC = () => {
           </h3>
           <p className="text-gray-600">Ca làm việc tuần này</p>
         </div>
-        
+
         <div className="clinic-card text-center">
-          <h3 className="text-2xl font-bold text-clinic-navy">2</h3>
+          <h3 className="text-2xl font-bold text-clinic-navy">3</h3>
           <p className="text-gray-600">Ca/ngày</p>
         </div>
       </div>

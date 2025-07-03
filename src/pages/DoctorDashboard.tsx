@@ -54,6 +54,14 @@ const mockQueue = [
     time: "09:30",
     symptoms: "Kiểm tra định kỳ",
     status: "finish"
+  },
+  {
+    id: 5,
+    queueNumber: 3,
+    patientName: "Lê Văn C",
+    time: "09:30",
+    symptoms: "Kiểm tra định kỳ",
+    status: "called"
   }
 ];
 
@@ -544,7 +552,27 @@ const DoctorDashboard = () => {
                         </Button>
                       )}
 
-                      {["called", "doing", "finish"].includes(patient.status) && (
+                      {["called",].includes(patient.status) && (
+
+                        <><Button
+                          size="sm"
+                          className="bg-green-600 hover:bg-green-700"
+                          onClick={() => handleCreateExamination(patient)}
+                        >
+                          {patient.examinationForm ? "Chỉnh Sửa Phiếu Khám" : "Tạo Phiếu Khám"}
+                        </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleViewPatient(patient)}
+                          >
+                            <Eye className="w-4 h-4 mr-1" />
+                            Xem Hồ Sơ
+                          </Button></>
+                      )}
+
+
+                      {["doing", "finish"].includes(patient.status) && (
                         <>
                           <Button
                             size="sm"
@@ -564,13 +592,7 @@ const DoctorDashboard = () => {
                             <Eye className="w-4 h-4 mr-1" />
                             Xem Hồ Sơ
                           </Button>
-                          <Button
-                            size="sm"
-                            className="bg-green-600 hover:bg-green-700"
-                            onClick={() => handleCreateExamination(patient)}
-                          >
-                            {patient.examinationForm ? "Chỉnh Sửa Phiếu Khám" : "Tạo Phiếu Khám"}          
-                          </Button>
+
                         </>
                       )}
 
@@ -666,7 +688,7 @@ const DoctorDashboard = () => {
                         <span className="text-green-700 font-semibold">
                           Vui lòng vào phòng khám
                         </span>
-                       
+
                       </div>
                     </div>
                   ))}

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Calendar, Clock, User, Building, RefreshCw, Check, X } from 'lucide-react';
 import { Card } from '@/components/ui/card';
@@ -9,7 +10,7 @@ interface ScheduleItem {
   id: number;
   day: string;
   date: string;
-  shift: 'morning' | 'afternoon';
+  shift: 'morning' | 'afternoon' | 'evening';
   shiftTime: string;
   room: string;
   doctorName: string;
@@ -50,11 +51,12 @@ const WeeklyScheduleGrid: React.FC<WeeklyScheduleGridProps> = ({
 
   const shifts = [
     { id: 'morning', name: 'Ca sáng', time: '8:00 - 12:00' },
-    { id: 'afternoon', name: 'Ca chiều', time: '13:30 - 17:30' }
+    { id: 'afternoon', name: 'Ca chiều', time: '13:30 - 17:30' },
+    { id: 'evening', name: 'Ca tối', time: '18:00 - 22:00' }
   ];
 
-  const getScheduleForDayShift = (day: string, shift: string) => {
-    return schedules.find(s => s.day === day && s.shift === shift);
+  const getSchedulesForDayShift = (day: string, shift: string) => {
+    return schedules.filter(s => s.day === day && s.shift === shift);
   };
 
   const handleScheduleClick = (schedule: ScheduleItem) => {
@@ -110,11 +112,11 @@ const WeeklyScheduleGrid: React.FC<WeeklyScheduleGridProps> = ({
                       {request.requesterName} muốn đổi lịch
                     </p>
                     <p className="text-sm text-gray-600">
-                      {request.fromSchedule.day} - {request.fromSchedule.shift === 'morning' ? 'Ca sáng' : 'Ca chiều'} 
+                      {request.fromSchedule.day} - {request.fromSchedule.shift === 'morning' ? 'Ca sáng' : request.fromSchedule.shift === 'afternoon' ? 'Ca chiều' : 'Ca tối'} 
                       - {request.fromSchedule.room}
                     </p>
                     <p className="text-sm text-gray-600">
-                      ↔ {request.toSchedule.day} - {request.toSchedule.shift === 'morning' ? 'Ca sáng' : 'Ca chiều'} 
+                      ↔ {request.toSchedule.day} - {request.toSchedule.shift === 'morning' ? 'Ca sáng' : request.toSchedule.shift === 'afternoon' ? 'Ca chiều' : 'Ca tối'} 
                       - {request.toSchedule.room}
                     </p>
                   </div>
@@ -201,45 +203,53 @@ const WeeklyScheduleGrid: React.FC<WeeklyScheduleGridProps> = ({
                 </div>
                 
                 {weekDays.map(day => {
-                  const schedule = getScheduleForDayShift(day.id, shift.id);
-                  const isSelected = selectedFromSchedule?.id === schedule?.id || selectedToSchedule?.id === schedule?.id;
-                  const isMySchedule = schedule?.doctorId === currentDoctorId;
-                  const canSelect = schedule?.status === 'assigned' && 
-                    ((isMySchedule && !selectedFromSchedule) || 
-                     (!isMySchedule && selectedFromSchedule && !selectedToSchedule));
+                  const dayShiftSchedules = getSchedulesForDayShift(day.id, shift.id);
 
                   return (
                     <div key={`${day.id}-${shift.id}`} className="p-2">
-                      {schedule && schedule.status === 'assigned' ? (
-                        <div
-                          className={`p-3 rounded-lg border-2 cursor-pointer transition-all ${
-                            isSelected 
-                              ? 'border-blue-500 bg-blue-100 shadow-md'
-                              : isMySchedule
-                                ? 'border-green-500 bg-green-50 hover:bg-green-100'
-                                : canSelect
-                                  ? 'border-gray-300 bg-gray-50 hover:bg-gray-100'
-                                  : 'border-gray-200 bg-gray-50'
-                          } ${canSelect ? 'hover:shadow-md' : ''}`}
-                          onClick={() => canSelect ? handleScheduleClick(schedule) : undefined}
-                        >
-                          <div className="space-y-1">
-                            <div className="flex items-center text-xs">
-                              <User className="w-3 h-3 mr-1" />
-                              <span className={isMySchedule ? 'font-bold text-green-700' : 'text-gray-700'}>
-                                {schedule.doctorName}
-                              </span>
-                            </div>
-                            <div className="flex items-center text-xs text-gray-600">
-                              <Building className="w-3 h-3 mr-1" />
-                              <span>{schedule.room}</span>
-                            </div>
-                            {isMySchedule && (
-                              <Badge className="text-xs bg-green-100 text-green-800">
-                                Lịch của tôi
-                              </Badge>
-                            )}
-                          </div>
+                      {dayShiftSchedules.length > 0 ? (
+                        <div className="space-y-2">
+                          {dayShiftSchedules.map(schedule => {
+                            const isSelected = selectedFromSchedule?.id === schedule.id || selectedToSchedule?.id === schedule.id;
+                            const isMySchedule = schedule.doctorId === currentDoctorId;
+                            const canSelect = schedule.status === 'assigned' && 
+                              ((isMySchedule && !selectedFromSchedule) || 
+                               (!isMySchedule && selectedFromSchedule && !selectedToSchedule));
+
+                            return (
+                              <div
+                                key={schedule.id}
+                                className={`p-3 rounded-lg border-2 cursor-pointer transition-all ${
+                                  isSelected 
+                                    ? 'border-blue-500 bg-blue-100 shadow-md'
+                                    : isMySchedule
+                                      ? 'border-green-500 bg-green-50 hover:bg-green-100'
+                                      : canSelect
+                                        ? 'border-gray-300 bg-gray-50 hover:bg-gray-100'
+                                        : 'border-gray-200 bg-gray-50'
+                                } ${canSelect ? 'hover:shadow-md' : ''}`}
+                                onClick={() => canSelect ? handleScheduleClick(schedule) : undefined}
+                              >
+                                <div className="space-y-1">
+                                  <div className="flex items-center text-xs">
+                                    <User className="w-3 h-3 mr-1" />
+                                    <span className={isMySchedule ? 'font-bold text-green-700' : 'text-gray-700'}>
+                                      {schedule.doctorName}
+                                    </span>
+                                  </div>
+                                  <div className="flex items-center text-xs text-gray-600">
+                                    <Building className="w-3 h-3 mr-1" />
+                                    <span>{schedule.room}</span>
+                                  </div>
+                                  {isMySchedule && (
+                                    <Badge className="text-xs bg-green-100 text-green-800">
+                                      Lịch của tôi
+                                    </Badge>
+                                  )}
+                                </div>
+                              </div>
+                            );
+                          })}
                         </div>
                       ) : (
                         <div className="p-3 rounded-lg border-2 border-dashed border-gray-200 bg-gray-50">
@@ -265,7 +275,7 @@ const WeeklyScheduleGrid: React.FC<WeeklyScheduleGridProps> = ({
                 <div className="p-3 bg-green-100 rounded border-l-4 border-green-500">
                   <h4 className="font-medium text-green-800">Lịch hiện tại của tôi:</h4>
                   <p className="text-sm text-green-700">
-                    {selectedFromSchedule.day} - {selectedFromSchedule.shift === 'morning' ? 'Ca sáng' : 'Ca chiều'} - {selectedFromSchedule.room}
+                    {selectedFromSchedule.day} - {selectedFromSchedule.shift === 'morning' ? 'Ca sáng' : selectedFromSchedule.shift === 'afternoon' ? 'Ca chiều' : 'Ca tối'} - {selectedFromSchedule.room}
                   </p>
                 </div>
               )}
@@ -273,7 +283,7 @@ const WeeklyScheduleGrid: React.FC<WeeklyScheduleGridProps> = ({
                 <div className="p-3 bg-blue-100 rounded border-l-4 border-blue-500">
                   <h4 className="font-medium text-blue-800">Lịch muốn đổi:</h4>
                   <p className="text-sm text-blue-700">
-                    {selectedToSchedule.day} - {selectedToSchedule.shift === 'morning' ? 'Ca sáng' : 'Ca chiều'} - {selectedToSchedule.room}
+                    {selectedToSchedule.day} - {selectedToSchedule.shift === 'morning' ? 'Ca sáng' : selectedToSchedule.shift === 'afternoon' ? 'Ca chiều' : 'Ca tối'} - {selectedToSchedule.room}
                   </p>
                   <p className="text-sm text-blue-700">BS: {selectedToSchedule.doctorName}</p>
                 </div>
