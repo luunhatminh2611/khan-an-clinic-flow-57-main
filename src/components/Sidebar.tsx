@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
@@ -58,7 +57,7 @@ const Sidebar: React.FC = () => {
         { icon: Building, label: 'Quản lý phòng khám', path: '/admin/clinic' },
         { icon: ClipboardList, label: 'Quản lý vật tư', path: '/admin/supplies' },
         { icon: Library, label: 'Lịch làm việc', path: '/admin/schedule-list' },
-
+        { icon: ClipboardList, label: 'Quản lý danh mục thuốc', path: '/admin/medicines' },
         { icon: User, label: 'Danh sách bệnh nhân', path: '/admin/list' },
         { icon: Settings, label: 'Nhật ký hệ thống', path: '/admin/logs' },
       ];

@@ -12,16 +12,14 @@ const AdminDashboard: React.FC = () => {
   const systemStats = [
     { label: 'Tổng người dùng', value: '156', change: '+12', icon: Users, color: 'bg-blue-500' },
     { label: 'Bác sĩ hoạt động', value: '8', change: '+1', icon: Activity, color: 'bg-blue-500' },
-    { label: 'Phòng khám', value: '6', change: '0', icon: Building, color: 'bg-blue-500' },
-    { label: 'Doanh thu tháng', value: '125M', change: '+8%', icon: DollarSign, color: 'bg-blue-500' }
+    { label: 'Phòng khám', value: '6', change: '0', icon: Building, color: 'bg-blue-500' }
   ];
 
   // Thống kê hoạt động phòng khám
   const clinicOperations = [
     { label: 'Lượt khám hôm nay', value: '45', change: '+5', icon: Activity, color: 'bg-blue-500', bgColor: 'bg-white' },
     { label: 'Tỷ lệ đầy phòng', value: '85%', change: '+3%', icon: Building, color: 'bg-blue-500', bgColor: 'bg-white' },
-    { label: 'Thời gian chờ TB', value: '12p', change: '-2p', icon: Clock, color: 'bg-blue-500', bgColor: 'bg-white' },
-    { label: 'Độ hài lòng', value: '4.7/5', change: '+0.2', icon: HeartPulse, color: 'bg-blue-500', bgColor: 'bg-white' }
+    { label: 'Thời gian chờ TB', value: '12p', change: '-2p', icon: Clock, color: 'bg-blue-500', bgColor: 'bg-white' }
   ];
 
   // Xu hướng 7 ngày qua
@@ -366,6 +364,14 @@ const AdminDashboard: React.FC = () => {
     }
   };
 
+  // Dữ liệu mẫu cho biểu đồ bệnh nhân từng ngày trong tháng này và tháng trước (30 ngày, chỉ ghi ngày, tháng này cao hơn rõ rệt)
+  const dailyPatientStats = Array.from({ length: 30 }, (_, i) => {
+    const day = (i + 1).toString().padStart(2, '0');
+    const previous = 10 + Math.floor(Math.random() * 10); // 10-19
+    const current = previous + 5 + Math.floor(Math.random() * 11); // hơn 5-15 đơn vị
+    return { day, current, previous };
+  });
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30">
       {/* Modern Header with Gradient */}
@@ -401,7 +407,7 @@ const AdminDashboard: React.FC = () => {
 
       <div className="max-w-8xl mx-auto px-6 space-y-8 pb-8">
         {/* Modern Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
         {systemStats.map((stat, index) => (
             <div key={index} className="group">
               <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-500 hover:scale-105 hover:-translate-y-1">
@@ -434,7 +440,7 @@ const AdminDashboard: React.FC = () => {
             <Activity className="w-7 h-7 mr-3 text-clinic-blue" />
             Hoạt động phòng khám hôm nay
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
             {clinicOperations.map((stat, index) => (
               <div key={index} className={`${stat.bgColor} rounded-2xl p-6 border border-gray-200 hover:shadow-lg transition-all duration-300 group`}>
                 <div className="flex items-center justify-between mb-4">
@@ -459,32 +465,14 @@ const AdminDashboard: React.FC = () => {
         <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-xl border border-white/20 p-8">
           <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
             <BarChart3 className="w-7 h-7 mr-3 text-clinic-green" />
-            Xu hướng 7 ngày qua
+            Thống kê bệnh nhân từng ngày trong tháng
           </h2>
           <div className="h-80">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={weeklyTrends}>
+              <LineChart data={dailyPatientStats}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                <XAxis 
-                  dataKey="day" 
-                  stroke="#6b7280"
-                  fontSize={14}
-                  fontWeight={500}
-                />
-                <YAxis 
-                  yAxisId="patients"
-                  orientation="left"
-                  stroke="#3b82f6"
-                  fontSize={14}
-                  fontWeight={500}
-                />
-                <YAxis 
-                  yAxisId="revenue"
-                  orientation="right"
-                  stroke="#10b981"
-                  fontSize={14}
-                  fontWeight={500}
-                />
+                <XAxis dataKey="day" stroke="#6b7280" fontSize={16} fontWeight={700} angle={0} textAnchor="middle" height={40} />
+                <YAxis stroke="#3b82f6" fontSize={14} fontWeight={500} allowDecimals={false} />
                 <Tooltip 
                   contentStyle={{
                     backgroundColor: 'rgba(255, 255, 255, 0.95)',
@@ -494,34 +482,18 @@ const AdminDashboard: React.FC = () => {
                     backdropFilter: 'blur(10px)',
                     fontSize: '14px'
                   }}
-                  formatter={(value, name) => [
-                    name === 'Số bệnh nhân' ? `${value} bệnh nhân` : `${value} VND`,
-                    name
-                  ]}
+                  formatter={(value, name) => [`${value} bệnh nhân`, name]}
+                  labelFormatter={label => `Ngày ${label}`}
                 />
                 <Legend />
-                <Line 
-                  yAxisId="patients"
-                  type="monotone" 
-                  dataKey="patients" 
-                  stroke="#3b82f6" 
-                  strokeWidth={3}
-                  dot={{ fill: '#3b82f6', strokeWidth: 2, r: 6 }}
-                  activeDot={{ r: 8, stroke: '#3b82f6', strokeWidth: 2 }}
-                  name="Số bệnh nhân"
-                />
-                <Line 
-                  yAxisId="revenue"
-                  type="monotone" 
-                  dataKey="revenue" 
-                  stroke="#10b981" 
-                  strokeWidth={3}
-                  dot={{ fill: '#10b981', strokeWidth: 2, r: 6 }}
-                  activeDot={{ r: 8, stroke: '#10b981', strokeWidth: 2 }}
-                  name="Doanh thu (M)"
-                />
+                <Line type="monotone" dataKey="current" stroke="#10b981" strokeWidth={3} dot={{ fill: '#10b981', r: 5 }} name="Tháng này" />
+                <Line type="monotone" dataKey="previous" stroke="#3b82f6" strokeWidth={3} dot={{ fill: '#3b82f6', r: 5 }} name="Tháng trước" />
               </LineChart>
             </ResponsiveContainer>
+          </div>
+          <div className="mt-2 text-center text-gray-500 text-base">
+            <span className="block">Cột dọc: <b>Số lượng bệnh nhân</b></span>
+            <span className="block">Cột ngang: <b>Ngày trong tháng</b></span>
           </div>
         </div>
 
@@ -1030,132 +1002,6 @@ const AdminDashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* Modern Receptionist Analysis */}
-        <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-xl border border-white/20 p-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-            <Users className="w-7 h-7 mr-3 text-orange-600" />
-            Phân tích lễ tân - Thống kê tháng này
-          </h2>
-          
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div className="space-y-6">
-              <h3 className="text-lg font-bold text-gray-900">Chi tiết từng lễ tân</h3>
-              <div className="space-y-4 max-h-96 overflow-y-auto">
-                {receptionistAnalysis.map((receptionist, index) => (
-                  <div key={index} className="bg-gradient-to-br from-gray-50 to-white rounded-2xl p-6 border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300">
-                    <div className="flex items-center justify-between mb-4">
-                      <div>
-                        <p className="font-bold text-gray-900 text-lg">{receptionist.name}</p>
-                        <p className="text-sm text-gray-600">{receptionist.specialty}</p>
-                      </div>
-                      <span className={`text-sm px-3 py-1 rounded-full font-semibold ${getDoctorStatusColor(receptionist.status)}`}>
-                        {getDoctorStatusText(receptionist.status)}
-                      </span>
-                    </div>
-                    
-                    <div className="grid grid-cols-4 gap-3 mb-4">
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-blue-600">{receptionist.hoursWorked}</div>
-                        <div className="text-xs text-gray-500">giờ làm</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-blue-600">{receptionist.daysWorked}</div>
-                        <div className="text-xs text-gray-500">ngày làm</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-blue-600">{receptionist.appointmentsHandled}</div>
-                        <div className="text-xs text-gray-500">lịch hẹn</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-blue-600">{receptionist.callsAnswered}</div>
-                        <div className="text-xs text-gray-500">cuộc gọi</div>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-600">Hiệu suất:</span>
-                      <span className="font-bold text-gray-900">{receptionist.efficiency}</span>
-                    </div>
-                    <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden mt-2">
-                      <div 
-                        className={`h-2 rounded-full transition-all duration-700 ${
-                          parseInt(receptionist.efficiency) >= 95 ? 'bg-gradient-to-r from-green-400 to-green-600' :
-                          parseInt(receptionist.efficiency) >= 90 ? 'bg-gradient-to-r from-blue-400 to-blue-600' :
-                          parseInt(receptionist.efficiency) >= 85 ? 'bg-gradient-to-r from-yellow-400 to-yellow-600' : 
-                          'bg-gradient-to-r from-red-400 to-red-600'
-                        }`}
-                        style={{ width: `${parseInt(receptionist.efficiency)}%` }}
-                      ></div>
-            </div>
-          </div>
-        ))}
-              </div>
-            </div>
-
-                         <div className="space-y-6">
-               <h3 className="text-lg font-bold text-gray-900">Phân bố lịch hẹn xử lý</h3>
-               <div className="h-80">
-                 <ResponsiveContainer width="100%" height="100%">
-                   <BarChart
-                     data={receptionistAnalysis.map(rec => ({
-                       ...rec,
-                       shortName: rec.name.split(' ').slice(-2).join(' ')
-                     }))}
-                     margin={{
-                       top: 20,
-                       right: 30,
-                       left: 20,
-                       bottom: 30,
-                     }}
-                   >
-                     <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                     <XAxis 
-                       dataKey="shortName" 
-                       stroke="#6b7280"
-                       fontSize={14}
-                       fontWeight={600}
-                       textAnchor="middle"
-                       height={50}
-                     />
-                     <YAxis 
-                       stroke="#6b7280"
-                       fontSize={14}
-                       fontWeight={500}
-                     />
-                     <Tooltip 
-                       contentStyle={{
-                         backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                         border: '1px solid #e5e7eb',
-                         borderRadius: '12px',
-                         boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)',
-                         backdropFilter: 'blur(10px)',
-                         fontSize: '14px'
-                       }}
-                       formatter={(value, name) => [`${value} lịch hẹn`, 'Số lịch hẹn']}
-                       labelFormatter={(label) => `Lễ tân: ${label}`}
-                     />
-                     <Bar 
-                       dataKey="appointmentsHandled" 
-                       fill="#3b82f6"
-                       radius={[4, 4, 0, 0]}
-                     />
-                   </BarChart>
-                 </ResponsiveContainer>
-      </div>
-
-              {/* Top Performers */}
-              <div className="bg-white rounded-xl p-4 border border-gray-200">
-                <h4 className="font-bold text-black mb-2">🏆 Xuất sắc nhất tháng</h4>
-                <div className="text-sm text-black">
-                  <div><strong>Nhiều lịch hẹn nhất:</strong> {receptionistAnalysis.reduce((max, rec) => rec.appointmentsHandled > max.appointmentsHandled ? rec : max).name} ({receptionistAnalysis.reduce((max, rec) => rec.appointmentsHandled > max.appointmentsHandled ? rec : max).appointmentsHandled} LH)</div>
-                  <div><strong>Nhiều cuộc gọi nhất:</strong> {receptionistAnalysis.reduce((max, rec) => rec.callsAnswered > max.callsAnswered ? rec : max).name} ({receptionistAnalysis.reduce((max, rec) => rec.callsAnswered > max.callsAnswered ? rec : max).callsAnswered} CG)</div>
-                  <div><strong>Hiệu suất cao nhất:</strong> {receptionistAnalysis.reduce((max, rec) => parseInt(rec.efficiency) > parseInt(max.efficiency) ? rec : max).name} ({receptionistAnalysis.reduce((max, rec) => parseInt(rec.efficiency) > parseInt(max.efficiency) ? rec : max).efficiency})</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
         {/* Modern Recommendations */}
         <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-xl border border-white/20 p-8">
           <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
@@ -1182,7 +1028,6 @@ const AdminDashboard: React.FC = () => {
                       </span>
                     </div>
                     <p className="font-bold text-gray-900 mb-2 text-lg">{rec.suggestion}</p>
-                    <p className="text-gray-600 text-base">{rec.impact}</p>
                   </div>
                 </div>
               </div>
