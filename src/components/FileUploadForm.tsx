@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -7,11 +7,20 @@ import { Textarea } from '@/components/ui/textarea';
 import { Upload, FileImage, FileText, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
-const FileUploadForm = ({ test, onSave, onCancel }) => {
+const FileUploadForm = ({ test, onSave, onCancel, initialData = null }) => {
   const [files, setFiles] = useState([]);
   const [results, setResults] = useState('');
   const [notes, setNotes] = useState('');
   const { toast } = useToast();
+
+  // Load dữ liệu đã có nếu có
+  useEffect(() => {
+    if (initialData) {
+      setFiles(initialData.files || []);
+      setResults(initialData.results || '');
+      setNotes(initialData.notes || '');
+    }
+  }, [initialData]);
 
   const handleFileChange = (e, fileType) => {
     const file = e.target.files[0];
@@ -49,7 +58,7 @@ const FileUploadForm = ({ test, onSave, onCancel }) => {
       <h3 className="text-lg font-semibold mb-4">
         Tải Kết Quả Xét Nghiệm - {test?.testType}
       </h3>
-      
+
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
           <Label className="text-base font-medium">Tải lên file kết quả</Label>
@@ -69,7 +78,7 @@ const FileUploadForm = ({ test, onSave, onCancel }) => {
                 onChange={(e) => handleFileChange(e, 'image')}
               />
             </div>
-            
+
             <div>
               <Label htmlFor="pdf-upload" className="cursor-pointer">
                 <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-blue-500 transition-colors">
@@ -141,11 +150,11 @@ const FileUploadForm = ({ test, onSave, onCancel }) => {
             placeholder="Ghi chú thêm..."
           />
         </div>
-        
+
         <div className="flex gap-2 pt-4">
           <Button type="submit" className="bg-green-600 hover:bg-green-700">
             <Upload className="w-4 h-4 mr-2" />
-            Hoàn Thành Xét Nghiệm
+            {initialData ? "Cập Nhật Kết Quả" : "Hoàn Thành Xét Nghiệm"}
           </Button>
           <Button type="button" variant="outline" onClick={onCancel}>
             Hủy
