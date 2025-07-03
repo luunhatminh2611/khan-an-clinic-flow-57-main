@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -21,6 +20,7 @@ import ScheduleAll from "./pages/admin/ScheduleAll";
 
 import MedicalRecordPage from "./components/MedicalRecordDetail";
 import SupplyManagementPage from "./pages/admin/SuppliesManagement";
+import MedicineManagement from "./pages/admin/MedicineManagement";
 
 const queryClient = new QueryClient();
 
@@ -47,6 +47,7 @@ const App = () => (
             <Route path="/admin/list" element={<PatientList />} />
             <Route path="/admin/schedule-list" element={<ScheduleAll />} />
             <Route path="/admin/supplies" element={<SupplyManagementPage />} />
+            <Route path="/admin/medicines" element={<MedicineManagement />} />
 
             {/* Các route khác cũng dùng layout */}
             <Route path="/dashboard" element={<Dashboard />} />
