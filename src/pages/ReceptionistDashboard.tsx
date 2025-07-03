@@ -102,6 +102,19 @@ const mockAppointments = [
     assignedDoctor: undefined,
     room: undefined,
   },
+  {
+    id: 5,
+    patientName: "Ngô Thị Y",
+    email: "ngothiy@gmail.com",
+    phone: "0977123456",
+    time: "14:00",
+    date: new Date().toISOString().split("T")[0],
+    symptoms: "Cảm cúm, đau họng",
+    status: "pending",
+    assignedDoctor: undefined,
+    room: undefined,
+    requestedDoctor: "BS. Trần Văn Nam",
+  },
 ];
 
 const mockDoctorsToday = [
@@ -119,6 +132,7 @@ const RoomAssignModal = ({
   onAssign,
   roomAssignError,
   setRoomAssignError,
+  appointmentToRoomAssign, // <-- thêm dòng này!
 }) => {
   if (!open) return null;
 
@@ -157,9 +171,23 @@ const RoomAssignModal = ({
           </thead>
           <tbody>
             {doctors.map((doctor) => (
-              <tr key={doctor.id} className="border-b">
+              <tr
+                key={doctor.id}
+                className={`border-b ${
+                  appointmentToRoomAssign?.requestedDoctor === doctor.name
+                    ? "bg-blue-50 font-semibold"
+                    : ""
+                }`}
+              >
                 <td className="py-3 px-3">{doctor.room}</td>
-                <td className="py-3 px-3">{doctor.name}</td>
+                <td className="py-3 px-3">
+                  {doctor.name}
+                  {appointmentToRoomAssign?.requestedDoctor === doctor.name && (
+                    <span className="ml-2 px-2 py-0.5 text-xs rounded bg-blue-200 text-blue-900">
+                      Ưu tiên
+                    </span>
+                  )}
+                </td>
                 <td className="py-3 px-3">{getPatientsInRoom(doctor.room)}</td>
                 <td className="py-3 px-3">
                   <Button
@@ -833,6 +861,14 @@ const ReceptionistDashboard = () => {
                         <div>Email: {appointment.email}</div>
                         <div>SĐT: {appointment.phone}</div>
                         <div>Triệu chứng: {appointment.symptoms}</div>
+                        {appointment.requestedDoctor && (
+                          <div>
+                            <span className="font-semibold text-blue-700">
+                              Bác sĩ yêu cầu:
+                            </span>{" "}
+                            {appointment.requestedDoctor}
+                          </div>
+                        )}
                         {appointment.room && appointment.assignedDoctor && (
                           <>
                             <div>Phòng: {appointment.room}</div>
@@ -954,6 +990,7 @@ const ReceptionistDashboard = () => {
             onAssign={handleAssignRoom}
             roomAssignError={roomAssignError}
             setRoomAssignError={setRoomAssignError}
+            appointmentToRoomAssign={appointmentToRoomAssign}
           />
         </Tabs>
       </div>

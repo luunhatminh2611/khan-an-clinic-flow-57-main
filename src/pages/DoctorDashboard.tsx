@@ -455,12 +455,7 @@ const DoctorDashboard = () => {
                         <span className="text-green-700 font-semibold">
                           Vui lòng vào phòng khám
                         </span>
-                        <button
-                          className="mt-2 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 font-semibold"
-                          onClick={() => handlePatientArrived(patient.id)}
-                        >
-                          Đã Gọi
-                        </button>
+                       
                       </div>
                     </div>
                   ))}
