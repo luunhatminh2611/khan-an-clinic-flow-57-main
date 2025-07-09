@@ -50,6 +50,15 @@ const Sidebar: React.FC = () => {
       ];
     }
 
+    if (location.pathname.includes('/nurse')) {
+      return [
+        { icon: Home, label: 'Trang chủ', path: '/nurse/dashboard' },
+        { icon: User, label: 'Thông tin cá nhân', path: '/nurse/my-info' },
+        { icon: Activity, label: 'Hàng chờ bệnh nhân', path: '/nurse/queue' },
+        { icon: Building, label: 'Quản lý phòng khám', path: '/nurse/rooms' },
+      ];
+    }
+
     if (location.pathname.includes('/admin')) {
       return [
         { icon: Home, label: 'Trang chủ', path: '/admin-dashboard' },

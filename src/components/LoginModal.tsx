@@ -35,6 +35,9 @@ const LoginModal = ({ onClose }) => {
         case 'doctor':
           navigate('/doctor-dashboard');
           break;
+        case 'nurse':
+          navigate('/nurse-dashboard');
+          break;
         case 'receptionist':
           navigate('/receptionist-dashboard');
           break;
@@ -81,6 +84,7 @@ const LoginModal = ({ onClose }) => {
               <SelectContent>
                 <SelectItem value="admin">Quản trị viên</SelectItem>
                 <SelectItem value="doctor">Bác sĩ</SelectItem>
+                <SelectItem value="nurse">Y tá</SelectItem>
                 <SelectItem value="receptionist">Lễ tân</SelectItem>
                 <SelectItem value="technician">Kỹ thuật viên</SelectItem>
               </SelectContent>
@@ -129,6 +133,7 @@ const LoginModal = ({ onClose }) => {
           <div className="space-y-1 text-sm text-gray-600">
             <div>Admin: admin / admin123</div>
             <div>Bác sĩ: doctor / doctor123</div>
+            <div>Y tá: nurse / nurse123</div>
             <div>Lễ tân: receptionist / rec123</div>
             <div>Kỹ thuật viên: tech / tech123</div>
           </div>

@@ -83,7 +83,6 @@ const ExaminationForm = ({
       setLabTests([...labTests, newTest]);
       setSelectedRoom("");
       setSelectedServices([]);
-      onStatusChange?.("doing");
       toast({
         title: "Thêm chỉ định xét nghiệm thành công!",
         description: `Đã thêm chỉ định cho ${room.name}`,
@@ -101,11 +100,22 @@ const ExaminationForm = ({
     const fullData = { ...formData, labTests };
     onSave(fullData);
     setIsSubmitted(true);
-    onStatusChange?.("doing");
-    toast({
-      title: "Tạo phiếu khám thành công!",
-      description: "Phiếu khám đã được tạo và gửi tới các phòng xét nghiệm.",
-    });
+    
+    // Nếu có chỉ định xét nghiệm, chuyển sang trạng thái pending (chờ thanh toán)
+    if (labTests.length > 0) {
+      onStatusChange?.("pending");
+      toast({
+        title: "Tạo phiếu khám thành công!",
+        description: "Đã tạo chỉ định xét nghiệm. Bệnh nhân cần thanh toán trước khi thực hiện xét nghiệm.",
+      });
+    } else {
+      // Nếu không có chỉ định, chuyển sang trạng thái in-examination (đang khám)
+      onStatusChange?.("in-examination");
+      toast({
+        title: "Tạo phiếu khám thành công!",
+        description: "Phiếu khám đã được tạo.",
+      });
+    }
   };
 
   // --- Xử lý chỉnh sửa chỉ định ---

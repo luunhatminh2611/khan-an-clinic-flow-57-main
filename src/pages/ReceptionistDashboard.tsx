@@ -57,9 +57,13 @@ const mockAppointments = [
     time: "08:00",
     date: new Date().toISOString().split("T")[0],
     symptoms: "Đau đầu, chóng mặt",
-    status: "pending",
-    assignedDoctor: undefined, // hoặc null
-    room: undefined, // hoặc null
+    status: "waiting-for-confirmation",
+    assignedDoctor: undefined,
+    room: undefined,
+    visitId: undefined,
+    visitStatus: undefined,
+    queueNumber: undefined,
+    requestedDoctor: undefined,
   },
   {
     id: 2,
@@ -69,11 +73,14 @@ const mockAppointments = [
     time: "09:00",
     date: new Date().toISOString().split("T")[0],
     symptoms: "Mất ngủ",
-    status: "checked-in",
+    status: "waiting-for-check-in",
     assignedDoctor: undefined,
     room: undefined,
+    visitId: undefined,
+    visitStatus: undefined,
+    queueNumber: undefined,
+    requestedDoctor: undefined,
   },
-  // ... các object còn lại, thêm 2 thuộc tính này tương tự
   {
     id: 3,
     patientName: "Phạm Văn C",
@@ -82,13 +89,13 @@ const mockAppointments = [
     time: "10:00",
     date: new Date().toISOString().split("T")[0],
     symptoms: "Tê tay, đau vai gáy",
-    status: "payment-required",
-    services: [
-      { name: "Chụp CT", price: 500000 },
-      { name: "Điện não đồ", price: 400000 },
-    ],
-    assignedDoctor: undefined,
-    room: undefined,
+    status: "checked-in",
+    assignedDoctor: "BS. Nguyễn Văn An",
+    room: "Phòng 1",
+    visitId: undefined,
+    visitStatus: undefined,
+    queueNumber: undefined,
+    requestedDoctor: undefined,
   },
   {
     id: 4,
@@ -98,9 +105,13 @@ const mockAppointments = [
     time: "11:00",
     date: new Date().toISOString().split("T")[0],
     symptoms: "Khó thở",
-    status: "waiting-for-confirm",
-    assignedDoctor: undefined,
-    room: undefined,
+    status: "in-progress",
+    assignedDoctor: "BS. Trần Thị Bình",
+    room: "Phòng 2",
+    visitId: 1703123456789,
+    visitStatus: "in-examination",
+    queueNumber: 1,
+    requestedDoctor: undefined,
   },
   {
     id: 5,
@@ -111,9 +122,16 @@ const mockAppointments = [
     date: new Date().toISOString().split("T")[0],
     symptoms: "Cảm cúm, đau họng",
     status: "pending",
-    assignedDoctor: undefined,
-    room: undefined,
-    requestedDoctor: "BS. Trần Văn Nam",
+    assignedDoctor: "BS. Lê Quang Huy",
+    room: "Phòng 3",
+    visitId: 1703123456790,
+    visitStatus: "pending",
+    queueNumber: 2,
+    requestedDoctor: undefined,
+    services: [
+      { name: "Chụp CT", price: 500000 },
+      { name: "Điện não đồ", price: 400000 },
+    ],
   },
 ];
 
@@ -132,7 +150,7 @@ const RoomAssignModal = ({
   onAssign,
   roomAssignError,
   setRoomAssignError,
-  appointmentToRoomAssign, // <-- thêm dòng này!
+  appointmentToRoomAssign,
 }) => {
   if (!open) return null;
 
@@ -243,7 +261,7 @@ const ReceptionistDashboard = () => {
   // THÊM STATE cho modal chọn phòng
   const [showRoomAssignModal, setShowRoomAssignModal] = useState(false);
   const [appointmentToRoomAssign, setAppointmentToRoomAssign] = useState(null);
-  const [roomAssignError, setRoomAssignError] = useState(""); // <-- Thêm dòng này ở đây
+  const [roomAssignError, setRoomAssignError] = useState("");
 
   const [showDoctorAssignModal, setShowDoctorAssignModal] = useState(false);
   const [appointmentToAssign, setAppointmentToAssign] = useState(null);
@@ -339,7 +357,7 @@ const ReceptionistDashboard = () => {
       apt.id === appointmentToAssign.id
         ? {
             ...apt,
-            status: "checked-in",
+            status: "waiting-for-check-in",
             assignedDoctor: doctor.name,
             room: doctor.room,
           }
@@ -352,8 +370,15 @@ const ReceptionistDashboard = () => {
   };
 
   // CHỌN PHÒNG & BÁC SĨ KHI VÀO KHÁM
+  // Luồng: Lễ tân bấm "Vào Khám" → Tạo Visit cho y tá quản lý
   const handleAssignRoom = (doctor) => {
     if (!appointmentToRoomAssign) return;
+
+    // Tạo queueNumber dựa trên số bệnh nhân đã có trong phòng
+    const patientsInRoom = appointments.filter(
+      (apt) => apt.room === doctor.room && apt.status === "in-progress"
+    ).length;
+    const queueNumber = patientsInRoom + 1;
 
     const updatedAppointments = appointments.map((apt) =>
       apt.id === appointmentToRoomAssign.id
@@ -362,6 +387,9 @@ const ReceptionistDashboard = () => {
             status: "in-progress",
             assignedDoctor: doctor.name,
             room: doctor.room,
+            visitId: Date.now(),
+            visitStatus: "waiting",
+            queueNumber: queueNumber, // Sử dụng queueNumber tính toán thay vì random
           }
         : apt
     );
@@ -407,16 +435,16 @@ const ReceptionistDashboard = () => {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case "pending":
+      case "waiting-for-confirmation":
         return "bg-yellow-100 text-yellow-800";
-      case "checked-in":
+      case "waiting-for-check-in":
         return "bg-blue-100 text-blue-800";
-      case "in-progress":
+      case "checked-in":
         return "bg-green-100 text-green-800";
-      case "payment-required":
+      case "in-progress":
+        return "bg-purple-100 text-purple-800";
+      case "pending":
         return "bg-orange-100 text-orange-800";
-      case "paid":
-        return "bg-teal-100 text-teal-800";
       case "completed":
         return "bg-gray-100 text-gray-800";
       case "canceled":
@@ -428,18 +456,16 @@ const ReceptionistDashboard = () => {
 
   const getStatusText = (status) => {
     switch (status) {
-      case "waiting-for-confirm":
+      case "waiting-for-confirmation":
         return "Chờ xác nhận lịch khám";
-      case "pending":
+      case "waiting-for-check-in":
         return "Chờ Check-in";
       case "checked-in":
         return "Đã Check-in";
       case "in-progress":
         return "Đang Khám";
-      case "payment-required":
+      case "pending":
         return "Cần Thanh Toán";
-      case "paid":
-        return "Đã Thu Tiền";
       case "completed":
         return "Hoàn Thành";
       case "canceled":
@@ -459,7 +485,11 @@ const ReceptionistDashboard = () => {
 
     const updatedAppointments = appointments.map((apt) =>
       apt.id === selectedAppointment.id
-        ? { ...apt, status: "paid", invoiceCreated: true }
+        ? { 
+            ...apt, 
+            status: "in-progress",
+            visitStatus: "in-laboratory"
+          }
         : apt
     );
 
@@ -550,7 +580,7 @@ const ReceptionistDashboard = () => {
           onValueChange={setActiveTab}
           className="space-y-6"
         >
-          <TabsList className="grid w-full grid-cols-4 gap-2">
+          <TabsList className="grid w-full grid-cols-5 gap-2">
             <TabsTrigger
               value="profile"
               className="flex items-center justify-center gap-2 text-sm truncate"
@@ -578,6 +608,13 @@ const ReceptionistDashboard = () => {
             >
               <Calendar className="w-4 h-4" />
               Lịch Hẹn Khám
+            </TabsTrigger>
+            <TabsTrigger
+              value="visits"
+              className="flex items-center justify-center gap-2 text-sm truncate"
+            >
+              <Users className="w-4 h-4" />
+              Lượt Khám
             </TabsTrigger>
           </TabsList>
 
@@ -744,7 +781,7 @@ const ReceptionistDashboard = () => {
               {appointments
                 .filter(
                   (apt) =>
-                    apt.status === "waiting-for-confirm" &&
+                    apt.status === "waiting-for-confirmation" &&
                     apt.date === selectedDate &&
                     (apt.patientName
                       .toLowerCase()
@@ -792,10 +829,7 @@ const ReceptionistDashboard = () => {
                           size="sm"
                           className="bg-green-600 hover:bg-green-700"
                           onClick={() => {
-                            updateAppointmentStatus(
-                              appointment.id,
-                              "checked-in"
-                            );
+                            updateAppointmentStatus(appointment.id, "waiting-for-check-in");
                           }}
                         >
                           <CheckCircle className="w-4 h-4 mr-1" />
@@ -888,7 +922,7 @@ const ReceptionistDashboard = () => {
                         Thông tin Bệnh Nhân
                       </Button>
 
-                      {appointment.status === "pending" && (
+                      {appointment.status === "waiting-for-check-in" && (
                         <>
                           <Button
                             size="sm"
@@ -931,12 +965,19 @@ const ReceptionistDashboard = () => {
                         </Button>
                       )}
                       {appointment.status === "in-progress" && (
-                        <Badge className="bg-green-100 text-green-800">
-                          Đang khám tại {appointment.room} (
-                          {appointment.assignedDoctor})
-                        </Badge>
+                        <div className="flex flex-col gap-2">
+                          <Badge className="bg-green-100 text-green-800">
+                            Đang khám tại {appointment.room} ({appointment.assignedDoctor})
+                          </Badge>
+                          {appointment.visitId && (
+                            <div className="text-sm text-gray-600">
+                              <span className="font-semibold">Số thứ tự:</span> #{appointment.queueNumber} | 
+                              <span className="font-semibold">Trạng thái Visit:</span> {appointment.visitStatus === "waiting" ? "Chờ y tá gọi" : appointment.visitStatus}
+                            </div>
+                          )}
+                        </div>
                       )}
-                      {appointment.status === "payment-required" && (
+                      {appointment.status === "pending" && (
                         <Button
                           size="sm"
                           className="bg-orange-600 hover:bg-orange-700"
@@ -970,6 +1011,80 @@ const ReceptionistDashboard = () => {
             />
           </TabsContent>
 
+          {/* Visits Tab - Hiển thị danh sách lượt khám cho y tá */}
+          <TabsContent value="visits" className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-xl font-semibold">Danh Sách Lượt Khám Hôm Nay</h2>
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-gray-600">Tổng lượt khám:</span>
+                <Badge className="bg-blue-100 text-blue-800">
+                  {appointments.filter(apt => apt.visitId).length}
+                </Badge>
+              </div>
+            </div>
+
+            <div className="grid gap-4">
+              {appointments
+                .filter(apt => apt.visitId && apt.status === "in-progress")
+                .sort((a, b) => (a.queueNumber || 0) - (b.queueNumber || 0))
+                .map((appointment) => (
+                  <Card key={appointment.id} className="p-6">
+                    <div className="flex justify-between items-start">
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-3">
+                          <div className="text-2xl font-bold text-blue-600">
+                            #{appointment.queueNumber}
+                          </div>
+                          <h3 className="text-lg font-semibold">
+                            {appointment.patientName}
+                          </h3>
+                          <Badge className={getStatusColor(appointment.status)}>
+                            {getStatusText(appointment.status)}
+                          </Badge>
+                          <Badge className="bg-purple-100 text-purple-800">
+                            Visit: {appointment.visitStatus || "waiting"}
+                          </Badge>
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-4 text-sm text-gray-600">
+                          <div className="flex items-center gap-1">
+                            <Clock className="w-4 h-4" />
+                            {appointment.time} - {appointment.date}
+                          </div>
+                          <div>Email: {appointment.email}</div>
+                          <div>SĐT: {appointment.phone}</div>
+                          <div>Triệu chứng: {appointment.symptoms}</div>
+                          <div>Phòng: {appointment.room}</div>
+                          <div>Bác sĩ: {appointment.assignedDoctor}</div>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-col gap-2">
+                        <div className="text-sm text-gray-600">
+                          <span className="font-semibold">Visit ID:</span> {appointment.visitId}
+                        </div>
+                        <div className="text-sm text-gray-600">
+                          <span className="font-semibold">Trạng thái Visit:</span> {appointment.visitStatus || "waiting"}
+                        </div>
+                        <div className="text-sm text-gray-600">
+                          <span className="font-semibold">Số thứ tự:</span> #{appointment.queueNumber}
+                        </div>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              
+              {appointments.filter(apt => apt.visitId && apt.status === "in-progress").length === 0 && (
+                <Card className="p-6 text-center">
+                  <p className="text-gray-600">Chưa có lượt khám nào được tạo</p>
+                  <p className="text-sm text-gray-500 mt-2">
+                    Lễ tân cần bấm "Vào Khám" để tạo lượt khám cho y tá quản lý
+                  </p>
+                </Card>
+              )}
+            </div>
+          </TabsContent>
+
           {/* Bạn vẫn giữ lại DoctorAssignModal nếu cần cho những logic khác */}
           <DoctorAssignModal
             open={showDoctorAssignModal}
@@ -983,7 +1098,7 @@ const ReceptionistDashboard = () => {
             open={showRoomAssignModal}
             onClose={() => {
               setShowRoomAssignModal(false);
-              setRoomAssignError(""); // reset lỗi khi đóng modal
+              setRoomAssignError("");
             }}
             doctors={mockDoctorsToday}
             appointments={appointments}
@@ -999,3 +1114,35 @@ const ReceptionistDashboard = () => {
 };
 
 export default ReceptionistDashboard;
+
+/*
+📋 TÓM TẮT NHỮNG THAY ĐỔI ĐỂ HỢP LOGIC VỚI Y TÁ:
+
+1. ✅ Thêm thuộc tính Visit vào mockAppointments:
+   - visitId: ID duy nhất cho Visit
+   - visitStatus: Trạng thái Visit (waiting, in-examination, pending, in-laboratory, returning, completed)
+   - queueNumber: Số thứ tự trong hàng chờ
+
+2. ✅ Cập nhật handleAssignRoom():
+   - Khi lễ tân bấm "Vào Khám" → Tạo Visit với visitStatus: "waiting"
+   - Appointment chuyển sang "in-progress"
+   - Y tá sẽ thấy bệnh nhân trong hàng chờ với trạng thái "waiting"
+
+3. ✅ Thêm tab "Lượt Khám" (Visits):
+   - Hiển thị danh sách Visit đã được tạo
+   - Sắp xếp theo số thứ tự
+   - Hiển thị thông tin Visit ID, trạng thái Visit
+
+4. ✅ Cập nhật hiển thị trạng thái:
+   - Hiển thị số thứ tự và trạng thái Visit khi appointment đang "in-progress"
+   - Giúp y tá biết bệnh nhân đang ở trạng thái nào
+
+5. 🔄 Luồng hoạt động mới:
+   Lễ tân: Check-in → "checked-in" → "Vào Khám" → "in-progress" + tạo Visit "waiting"
+   Y tá: Thấy Visit "waiting" → Gọi bệnh nhân → Visit "in-examination"
+   Bác sĩ: Khám → Tạo chỉ định → Visit "pending" + Assignment "pending"
+   Thanh toán → Visit "in-laboratory" + Assignment "waiting"
+   Kỹ thuật viên: Thực hiện xét nghiệm → Assignment "completed"
+   Tất cả Assignment hoàn thành → Visit "returning"
+   Bác sĩ tổng hợp → Visit "completed" + Appointment "completed"
+*/

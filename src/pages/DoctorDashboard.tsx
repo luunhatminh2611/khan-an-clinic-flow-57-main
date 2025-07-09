@@ -22,9 +22,9 @@ const mockQueue = [
     id: 1,
     queueNumber: 1,
     patientName: "Nguyễn Văn A",
-    time: "08:30",
+    time: "08:00", // Sửa thành 08:00 để đồng bộ với các dashboard khác
     symptoms: "Đau đầu, chóng mặt",
-    status: "waiting",
+    status: "waiting", // Bước 1: Chờ y tá gọi
   },
   {
     id: 2,
@@ -32,7 +32,7 @@ const mockQueue = [
     patientName: "Trần Thị B",
     time: "09:00",
     symptoms: "Mất ngủ, lo âu",
-    status: "called",
+    status: "in-examination", // Đang khám
     examinationForm: {
       diagnosis: "Thiếu máu não",
       note: "Cần nghỉ ngơi",
@@ -45,23 +45,49 @@ const mockQueue = [
     patientName: "Lê Văn C",
     time: "09:30",
     symptoms: "Kiểm tra định kỳ",
-    status: "doing"
+    status: "pending", // Chờ thanh toán sau khi tạo chỉ định
+    examinationForm: {
+      diagnosis: "Cần xét nghiệm thêm",
+      note: "Đã tạo chỉ định xét nghiệm",
+      doctor: "BS. Nguyễn Văn An",
+      labTests: [
+        { id: 1, room: "Phòng CT", services: ["Chụp CT não"], status: "pending" },
+        { id: 2, room: "Phòng Siêu âm", services: ["Siêu âm Doppler"], status: "pending" }
+      ]
+    }
   },
   {
     id: 4,
-    queueNumber: 3,
-    patientName: "Lê Văn C",
-    time: "09:30",
-    symptoms: "Kiểm tra định kỳ",
-    status: "finish"
+    queueNumber: 4,
+    patientName: "Phạm Thị D",
+    time: "10:00",
+    symptoms: "Tê tay, đau vai gáy",
+    status: "in-laboratory", // Đang đi xét nghiệm
+    examinationForm: {
+      diagnosis: "Đã hoàn thành xét nghiệm",
+      note: "Chờ kết quả",
+      doctor: "BS. Nguyễn Văn An",
+      labTests: [
+        { id: 3, room: "Phòng CT", services: ["Chụp CT cột sống"], status: "completed" },
+        { id: 4, room: "Phòng X-quang", services: ["X-quang cột sống"], status: "completed" }
+      ]
+    }
   },
   {
     id: 5,
-    queueNumber: 3,
-    patientName: "Lê Văn C",
-    time: "09:30",
-    symptoms: "Kiểm tra định kỳ",
-    status: "called"
+    queueNumber: 5,
+    patientName: "Hoàng Văn E",
+    time: "10:30",
+    symptoms: "Khó thở, đau ngực",
+    status: "returning", // Trở lại gặp bác sĩ
+    examinationForm: {
+      diagnosis: "Kết quả xét nghiệm bình thường",
+      note: "Cần theo dõi thêm",
+      doctor: "BS. Nguyễn Văn An",
+      labTests: [
+        { id: 5, room: "Phòng CT", services: ["Chụp CT ngực"], status: "completed" }
+      ]
+    }
   }
 ];
 
@@ -184,7 +210,10 @@ const DoctorDashboard = () => {
     switch (status) {
       case "waiting": return "bg-yellow-100 text-yellow-800";
       case "called": return "bg-blue-100 text-blue-800";
-      case "doing": return "bg-purple-100 text-purple-800";
+      case "in-examination": return "bg-purple-100 text-purple-800";
+      case "pending": return "bg-orange-100 text-orange-800";
+      case "in-laboratory": return "bg-indigo-100 text-indigo-800";
+      case "returning": return "bg-pink-100 text-pink-800";
       case "completed": return "bg-green-100 text-green-800";
       case "canceled": return "bg-red-100 text-red-800";
       case "finish": return "bg-red-100 text-red-800";
@@ -196,11 +225,13 @@ const DoctorDashboard = () => {
     switch (status) {
       case "waiting": return "Đang chờ";
       case "called": return "Đã gọi";
-      case "doing": return "Đang làm chỉ định";
+      case "in-examination": return "Đang khám";
+      case "pending": return "Chờ thanh toán";
+      case "in-laboratory": return "Đang xét nghiệm";
+      case "returning": return "Trở lại khám";
       case "completed": return "Hoàn thành";
       case "canceled": return "Đã hủy";
       case "finish": return "Hoàn thành chỉ định";
-
       default: return status;
     }
   };
@@ -258,6 +289,49 @@ const DoctorDashboard = () => {
     setShowAppointmentForm(false);
     setEditingAppointment(null);
     setSelectedPatient(null);
+  };
+
+  // Xử lý thanh toán - chuyển từ pending sang in-laboratory
+  const handlePaymentComplete = (patientId) => {
+    setQueue((prevQueue) =>
+      prevQueue.map((q) =>
+        q.id === patientId 
+          ? { 
+              ...q, 
+              status: "in-laboratory",
+              examinationForm: {
+                ...q.examinationForm,
+                labTests: q.examinationForm?.labTests?.map(test => ({
+                  ...test,
+                  status: "waiting" // Assignment chuyển sang waiting
+                }))
+              }
+            }
+          : q
+      )
+    );
+  };
+
+  // Xử lý hoàn thành tất cả assignment - chuyển sang returning
+  const handleAllAssignmentsComplete = (patientId) => {
+    setQueue((prevQueue) =>
+      prevQueue.map((q) =>
+        q.id === patientId 
+          ? { ...q, status: "returning" }
+          : q
+      )
+    );
+  };
+
+  // Kiểm tra và tự động chuyển trạng thái khi tất cả assignment hoàn thành
+  const checkAndUpdateVisitStatus = (patientId) => {
+    const patient = queue.find(q => q.id === patientId);
+    if (patient?.examinationForm?.labTests) {
+      const allCompleted = patient.examinationForm.labTests.every(test => test.status === "completed");
+      if (allCompleted && patient.status === "in-laboratory") {
+        handleAllAssignmentsComplete(patientId);
+      }
+    }
   };
 
   if (showResultLookup && selectedPatient) {
@@ -571,8 +645,27 @@ const DoctorDashboard = () => {
                           </Button></>
                       )}
 
+                      {["in-examination"].includes(patient.status) && (
+                        <>
+                          <Button
+                            size="sm"
+                            className="bg-green-600 hover:bg-green-700"
+                            onClick={() => handleCreateExamination(patient)}
+                          >
+                            {patient.examinationForm ? "Chỉnh Sửa Phiếu Khám" : "Tạo Phiếu Khám"}
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleViewPatient(patient)}
+                          >
+                            <Eye className="w-4 h-4 mr-1" />
+                            Xem Hồ Sơ
+                          </Button>
+                        </>
+                      )}
 
-                      {["doing", "finish"].includes(patient.status) && (
+                      {["pending", "in-laboratory"].includes(patient.status) && (
                         <>
                           <Button
                             size="sm"
@@ -592,7 +685,29 @@ const DoctorDashboard = () => {
                             <Eye className="w-4 h-4 mr-1" />
                             Xem Hồ Sơ
                           </Button>
+                        </>
+                      )}
 
+                      {["returning"].includes(patient.status) && (
+                        <>
+                          <Button
+                            size="sm"
+                            className="bg-purple-600 hover:bg-purple-700"
+                            onClick={() => {
+                              setSelectedPatient(patient);
+                              setShowResultLookup(true);
+                            }}
+                          >
+                            Tổng Hợp Kết Quả
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleViewPatient(patient)}
+                          >
+                            <Eye className="w-4 h-4 mr-1" />
+                            Xem Hồ Sơ
+                          </Button>
                         </>
                       )}
 

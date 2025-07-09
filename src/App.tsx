@@ -7,6 +7,8 @@ import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import ReceptionistDashboard from "./pages/ReceptionistDashboard";
 import DoctorDashboard from "./pages/DoctorDashboard";
+import NurseDashboard from "./pages/NurseDashboard";
+import WaitingRoomDisplay from "./pages/WaitingRoomDisplay";
 import TechnicianDashboard from "./pages/TechnicianDashboard";
 import NotFound from "./pages/NotFound";
 import AdminDashboard from "./pages/admin/Dashboard";
@@ -35,6 +37,8 @@ const App = () => (
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/receptionist-dashboard" element={<ReceptionistDashboard />} />
           <Route path="/doctor-dashboard" element={<DoctorDashboard />} />
+          <Route path="/nurse-dashboard" element={<NurseDashboard />} />
+          <Route path="/waiting-room-display" element={<WaitingRoomDisplay />} />
           <Route path="/technician-dashboard" element={<TechnicianDashboard />} />
           <Route path="/admin-1" element={<AdminDashboard1 />} />
           <Route path="/medical-record" element={<MedicalRecordPage />} />

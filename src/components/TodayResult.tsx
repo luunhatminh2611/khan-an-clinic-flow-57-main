@@ -105,6 +105,9 @@ const TodayVisitResult = ({ patient, onBack, onComplete, onCompleteSchedule }) =
     note: '',
   });
 
+  // Lấy kết quả assignment từ examinationForm
+  const assignmentResults = patient?.examinationForm?.labTests || [];
+
   const addPrescription = () => {
     const { medicineName, dosage, duration } = newPrescription;
     if (medicineName && dosage && duration) {
@@ -135,13 +138,34 @@ const TodayVisitResult = ({ patient, onBack, onComplete, onCompleteSchedule }) =
           <FileText className="w-5 h-5" />
           Kết Quả Chỉ Định Hôm Nay
         </h3>
-        {mockExamResults.map((res, i) => (
-          <div key={i} className="mb-4 border-l-4 border-blue-400 pl-4">
-            <div className="font-semibold">{res.type}</div>
-            <div className="text-sm text-gray-600">{res.date}</div>
-            <div>{res.result}</div>
-          </div>
-        ))}
+        {assignmentResults.length > 0 ? (
+          assignmentResults.map((assignment, i) => (
+            <div key={i} className="mb-4 border-l-4 border-blue-400 pl-4">
+              <div className="font-semibold">{assignment.room}</div>
+              <div className="text-sm text-gray-600">
+                Dịch vụ: {assignment.services.join(", ")}
+              </div>
+              <div className="text-sm text-gray-600">
+                Trạng thái: {assignment.status === "completed" ? "Hoàn thành" : "Đang xử lý"}
+              </div>
+              {assignment.status === "completed" && (
+                <div className="mt-2 p-2 bg-green-50 rounded">
+                  <div className="font-medium text-green-800">Kết quả:</div>
+                  <div className="text-sm text-green-700">
+                    {assignment.resultData?.results || "Kết quả bình thường"}
+                  </div>
+                  {assignment.resultData?.notes && (
+                    <div className="text-sm text-green-600 mt-1">
+                      Ghi chú: {assignment.resultData.notes}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          ))
+        ) : (
+          <div className="text-gray-500 italic">Chưa có chỉ định xét nghiệm nào</div>
+        )}
       </Card>
 
       {/* Kết luận khám */}

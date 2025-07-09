@@ -15,6 +15,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import FileUploadForm from '@/components/FileUploadForm';
 import PatientDetail from '@/components/PatientDetail';
+import { useToast } from '@/hooks/use-toast';
 
 // Mock data
 const mockLabTests = [
@@ -23,30 +24,54 @@ const mockLabTests = [
     patientName: 'Nguyễn Văn A',
     testType: 'Chụp CT não',
     orderTime: '08:30',
-    status: 'waiting',
+    status: 'waiting', // Bước 1: Đang chờ vào phòng
     doctorName: 'BS. Nguyễn Văn An',
     room: 'Phòng CT',
     resultData: null,
-
   },
   {
     id: 2,
     patientName: 'Trần Thị B',
     testType: 'Siêu âm Doppler',
     orderTime: '09:00',
-    status: 'completed',
+    status: 'in-progress', // Đang xét nghiệm
     doctorName: 'BS. Trần Thị Bình',
     room: 'Phòng siêu âm',
+    resultData: null,
+  },
+  {
+    id: 3,
+    patientName: 'Lê Văn C',
+    testType: 'Chụp CT cột sống',
+    orderTime: '09:30',
+    status: 'completed', // Hoàn thành
+    doctorName: 'BS. Nguyễn Văn An',
+    room: 'Phòng CT',
     resultData: {
       files: [],
       results: 'Không có bất thường',
       notes: 'Bệnh nhân cần theo dõi thêm',
     },
   },
+  {
+    id: 4,
+    patientName: 'Phạm Thị D',
+    testType: 'X-quang cột sống',
+    orderTime: '10:00',
+    status: 'completed', // Hoàn thành
+    doctorName: 'BS. Lê Minh Châu',
+    room: 'Phòng X-quang',
+    resultData: {
+      files: [],
+      results: 'Kết quả bình thường',
+      notes: 'Không có tổn thương',
+    },
+  },
 ];
 
 const TechnicianDashboard = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('profile');
   const [labTests, setLabTests] = useState(mockLabTests);
   const [selectedTest, setSelectedTest] = useState(null);
@@ -63,7 +88,7 @@ const TechnicianDashboard = () => {
       case 'waiting': return 'bg-yellow-100 text-yellow-800';
       case 'in-progress': return 'bg-blue-100 text-blue-800';
       case 'completed': return 'bg-green-100 text-green-800';
-      case 'pending-payment': return 'bg-red-100 text-red-800';
+      case 'pending': return 'bg-red-100 text-red-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
@@ -71,9 +96,9 @@ const TechnicianDashboard = () => {
   const getStatusText = (status) => {
     switch (status) {
       case 'waiting': return 'Đang chờ';
-      case 'in-progress': return 'Đang gọi';
+      case 'in-progress': return 'Đang xét nghiệm';
       case 'completed': return 'Hoàn thành';
-      case 'pending-payment': return 'Chờ thanh toán';
+      case 'pending': return 'Chờ thanh toán';
       default: return status;
     }
   };
@@ -98,6 +123,15 @@ const TechnicianDashboard = () => {
     );
     setShowUploadForm(false);
     setSelectedTest(null);
+
+    // Thông báo hoàn thành xét nghiệm
+    toast({
+      title: "Hoàn thành xét nghiệm!",
+      description: `Đã hoàn thành ${selectedTest.testType} cho ${selectedTest.patientName}`,
+    });
+
+    // TODO: Ở đây sẽ có logic để cập nhật Assignment status trong DoctorDashboard
+    // và tự động chuyển Visit sang "returning" khi tất cả Assignment completed
   };
 
   const handleLogout = () => {
@@ -229,7 +263,7 @@ const TechnicianDashboard = () => {
                         </Button>
                       )}
 
-                      {test.status === 'pending-payment' && (
+                      {test.status === 'pending' && (
                         <span className="text-sm text-red-600 italic">Đang chờ thanh toán</span>
                       )}
 
